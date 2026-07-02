@@ -16,19 +16,19 @@
    ──────────────────────────────────────────────────────────────────────── */
 
 :root {
-  /* Workspace neutrals */
-  --background: #f6f8fb;
+  /* Workspace neutrals — warm off-white canvas, white cards */
+  --background: #f7f7f5;
   --surface: #ffffff;
-  --surface-muted: #f1f5f9;
-  --foreground: #0f172a;
-  --muted-foreground: #5b6b81;
-  --faint-foreground: #94a3b8;
-  --border: #e2e8f0;
-  --border-strong: #cbd5e1;
+  --surface-muted: #f2f2f0;
+  --foreground: #1a1f2b;
+  --muted-foreground: #676e7c;
+  --faint-foreground: #9aa0ab;
+  --border: #e8e8e4;
+  --border-strong: #d4d4cf;
 
   /* Brand */
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
+  --primary: #2b62f0;
+  --primary-hover: #1f4fd8;
   --primary-foreground: #ffffff;
 
   /* Semantic status */
@@ -37,13 +37,13 @@
   --danger: #b91c1c;
   --info: #1d4ed8;
 
-  /* Navy navigation (constant across themes) */
-  --sidebar: #0c1a2e;
-  --sidebar-hover: #16263e;
-  --sidebar-active: #1d3050;
-  --sidebar-foreground: #cbd5e1;
-  --sidebar-muted: #7d8ba1;
-  --sidebar-border: #1c2c46;
+  /* Navigation — light in light mode (see .dark for the dark variant) */
+  --sidebar: #fbfbf9;
+  --sidebar-hover: #f0f0ee;
+  --sidebar-active: #ffffff;
+  --sidebar-foreground: #4b5261;
+  --sidebar-muted: #949aa6;
+  --sidebar-border: #e8e8e4;
 
   /* Product accents (see src/lib/accents.ts) */
   --accent-locate: #2563eb;
@@ -81,12 +81,12 @@
   --danger: #f87171;
   --info: #60a5fa;
 
-  --sidebar: #0a1322;
-  --sidebar-hover: #131f33;
-  --sidebar-active: #1b2b47;
+  --sidebar: #0d1524;
+  --sidebar-hover: #16223a;
+  --sidebar-active: #1c2c4a;
   --sidebar-foreground: #cbd5e1;
   --sidebar-muted: #7d8ba1;
-  --sidebar-border: #182742;
+  --sidebar-border: #1c2942;
 
   --accent-locate: #3b82f6;
   --accent-leak: #a78bfa;

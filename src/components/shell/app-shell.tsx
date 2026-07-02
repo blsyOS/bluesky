@@ -95,16 +95,16 @@ export function AppShell({
   const sidebarContent = (inDrawer: boolean) => {
     const slim = collapsed && !inDrawer;
     return (
-      <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
+      <div className="flex h-full flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
         <div
           className={cn(
-            "flex h-16 items-center border-b border-sidebar-border",
+            "flex h-16 items-center",
             slim ? "justify-center px-2" : "justify-between px-5"
           )}
         >
           <Link
             href="/dashboard"
-            className="text-white"
+            className="text-foreground"
             aria-label="BlueSky OS dashboard"
           >
             {slim ? <LogoMark /> : <Logo />}
@@ -113,7 +113,7 @@ export function AppShell({
             <button
               type="button"
               onClick={() => setDrawerOpen(false)}
-              className="flex size-11 items-center justify-center rounded-lg text-sidebar-muted hover:bg-sidebar-hover hover:text-white"
+              className="flex size-11 items-center justify-center rounded-lg text-sidebar-muted hover:bg-sidebar-hover hover:text-foreground"
               aria-label="Close navigation"
             >
               <XIcon className="size-5" />
@@ -123,7 +123,7 @@ export function AppShell({
 
         <div
           className={cn(
-            "mt-4 flex items-center gap-2.5 rounded-lg bg-sidebar-hover",
+            "mt-1 flex items-center gap-2.5 rounded-xl border border-sidebar-border bg-sidebar-active shadow-card",
             slim ? "mx-2 justify-center px-2 py-2.5" : "mx-4 px-3 py-2.5"
           )}
           title={`${company.name} · ${company.subdomain}.blueskyos.app`}
@@ -131,7 +131,7 @@ export function AppShell({
           <BuildingIcon className="size-4.5 shrink-0 text-sidebar-muted" />
           {!slim ? (
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-white">
+              <p className="truncate text-sm font-medium text-foreground">
                 {company.name}
               </p>
               <p className="truncate text-xs text-sidebar-muted">
@@ -144,12 +144,12 @@ export function AppShell({
         <nav
           aria-label="Main"
           className={cn(
-            "mt-2 flex-1 overflow-y-auto pb-4",
+            "mt-3 flex-1 overflow-y-auto pb-4",
             slim ? "px-2" : "px-3"
           )}
         >
           {NAV_SECTIONS.map((section) => (
-            <div key={section.label} className="mt-3 first:mt-1">
+            <div key={section.label} className="mt-4 first:mt-1">
               {slim ? (
                 <div
                   aria-hidden
@@ -160,7 +160,7 @@ export function AppShell({
                   {section.label}
                 </p>
               )}
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 {section.items.map((item) => {
                   const active =
                     pathname === item.href ||
@@ -174,20 +174,22 @@ export function AppShell({
                       aria-label={slim ? item.label : undefined}
                       title={slim ? item.label : undefined}
                       className={cn(
-                        "relative flex min-h-11 items-center gap-3 rounded-lg text-sm font-medium transition-colors",
-                        slim ? "justify-center px-0" : "px-3 py-2.5",
+                        "flex min-h-11 items-center gap-3 rounded-lg text-sm font-medium transition-colors",
+                        slim ? "justify-center px-0" : "px-3 py-2",
                         active
-                          ? "bg-sidebar-active text-white"
-                          : "text-sidebar-foreground hover:bg-sidebar-hover hover:text-white"
+                          ? "bg-sidebar-active text-foreground shadow-card ring-1 ring-sidebar-border"
+                          : "text-sidebar-foreground hover:bg-sidebar-hover hover:text-foreground"
                       )}
                     >
-                      {active ? (
-                        <span
-                          aria-hidden
-                          className="absolute inset-y-2 left-0 w-1 rounded-full bg-accent"
-                        />
-                      ) : null}
-                      <item.icon className="size-4.5 shrink-0" />
+                      <span
+                        aria-hidden
+                        className={cn(
+                          "flex size-6 shrink-0 items-center justify-center rounded-md text-white transition-colors",
+                          active ? "bg-accent" : "bg-accent/80"
+                        )}
+                      >
+                        <item.icon className="size-3.5" />
+                      </span>
                       {!slim ? item.label : null}
                     </Link>
                   );
@@ -204,7 +206,7 @@ export function AppShell({
             aria-pressed={collapsed}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             className={cn(
-              "mx-2 mb-2 flex min-h-10 items-center gap-2 rounded-lg px-3 text-xs font-medium text-sidebar-muted transition-colors hover:bg-sidebar-hover hover:text-white",
+              "mx-2 mb-2 flex min-h-10 items-center gap-2 rounded-lg px-3 text-xs font-medium text-sidebar-muted transition-colors hover:bg-sidebar-hover hover:text-foreground",
               collapsed && "justify-center px-0"
             )}
           >
@@ -234,7 +236,7 @@ export function AppShell({
             {!slim ? (
               <>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-white">
+                  <p className="truncate text-sm font-medium text-foreground">
                     {user.name}
                   </p>
                   <p className="truncate text-xs text-sidebar-muted">
@@ -243,7 +245,7 @@ export function AppShell({
                 </div>
                 <Link
                   href="/login"
-                  className="text-xs text-sidebar-muted hover:text-white"
+                  className="text-xs text-sidebar-muted hover:text-foreground"
                   title="Sign out"
                 >
                   Sign out

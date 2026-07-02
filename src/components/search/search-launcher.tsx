@@ -48,11 +48,11 @@ export function SearchLauncher() {
         type="button"
         onClick={toggle}
         aria-haspopup="dialog"
-        className="hidden h-10 w-full max-w-sm items-center gap-2.5 rounded-lg border border-border bg-surface-muted/60 px-3.5 text-sm text-muted-foreground transition-colors hover:border-border-strong hover:bg-surface-muted cursor-pointer sm:flex"
+        className="hidden h-10 w-full max-w-sm items-center gap-2.5 rounded-full border border-border bg-surface px-4 text-sm text-muted-foreground shadow-card transition-colors hover:border-border-strong cursor-pointer sm:flex"
       >
         <SearchIcon className="size-4" aria-hidden />
         <span className="flex-1 text-left">Search…</span>
-        <kbd className="rounded border border-border bg-surface px-1.5 py-0.5 text-[10px] font-medium">
+        <kbd className="rounded border border-border bg-surface-muted px-1.5 py-0.5 text-[10px] font-medium">
           {modKeyLabel()} K
         </kbd>
       </button>

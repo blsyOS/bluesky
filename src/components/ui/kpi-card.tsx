@@ -52,7 +52,7 @@ export function KpiCard({
       className={cn("h-full px-5 py-4", className)}
     >
       <div className="flex items-start justify-between gap-3">
-        <p className="text-meta">{title}</p>
+        <p className="text-[13px] font-medium text-muted-foreground">{title}</p>
         {icon ? (
           <span
             className={cn(

@@ -68,3 +68,16 @@ Append-only record of platform-level decisions. Newest entries last.
 - **Recent searches sit behind a `RecentSearchStore` interface** with an
   intentionally non-persistent in-memory implementation; persistence is
   deferred to authenticated user preferences.
+
+## Visual refresh (post BO-01.03B)
+
+- **Light navigation shell**: the sidebar is light in light mode (white
+  active "card" state, solid-accent icon tiles, neutral gray text) and
+  dark in dark mode — all flowing through the existing `--sidebar-*`
+  tokens, so no component knows which variant it renders. Product accent
+  still tints the nav tiles inside `/launch/*`.
+- **Pill shape language**: buttons and the topbar search trigger are
+  fully rounded; the workspace canvas moved to a warm off-white with
+  softer neutral borders. Table headers dropped the tinted uppercase
+  style for plain gray labels. Purely token/classname changes — no
+  behavior, markup structure, or API changes.
