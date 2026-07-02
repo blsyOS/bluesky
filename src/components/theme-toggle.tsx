@@ -10,7 +10,7 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-      className="inline-flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-surface-muted hover:text-foreground cursor-pointer"
+      className="inline-flex size-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-surface-muted hover:text-foreground cursor-pointer sm:size-10"
       aria-label="Toggle theme"
     >
       {/* Both icons render; the active theme's class decides which is visible.

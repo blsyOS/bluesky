@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Card, CardBody } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Badge, type BadgeTone } from "@/components/ui/badge";
 import { ArrowRightIcon } from "@/components/icons";
 import { accentStyle } from "@/lib/accents";
 import { cn } from "@/lib/cn";
@@ -47,14 +47,14 @@ export function ProductCard({
   name,
   description,
   launchable,
-  unavailableReason,
+  availability,
   href,
 }: {
   productKey: string;
   name: string;
   description: string | null;
   launchable: boolean;
-  unavailableReason?: string | null;
+  availability: { label: string; tone: BadgeTone };
   href?: string;
 }) {
   const card = (
@@ -66,13 +66,7 @@ export function ProductCard({
       <CardBody className="flex h-full flex-col p-5">
         <div className="flex items-start justify-between gap-3">
           <ProductGlyph name={name} productKey={productKey} size="lg" />
-          {unavailableReason ? (
-            <Badge tone={unavailableReason === "Coming soon" ? "warning" : "neutral"}>
-              {unavailableReason}
-            </Badge>
-          ) : (
-            <Badge tone="success">Available</Badge>
-          )}
+          <Badge tone={availability.tone}>{availability.label}</Badge>
         </div>
         <h3 className="mt-4 text-title-section">{name}</h3>
         <p className="mt-1 flex-1 text-caption">{description}</p>

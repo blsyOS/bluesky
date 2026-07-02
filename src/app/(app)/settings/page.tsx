@@ -31,10 +31,6 @@ export default async function SettingsPage() {
       <PageHeader
         title="Company settings"
         description="Your company profile and workspace preferences."
-        breadcrumbs={[
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Settings" },
-        ]}
       />
 
       <div className="grid gap-6 lg:grid-cols-2">

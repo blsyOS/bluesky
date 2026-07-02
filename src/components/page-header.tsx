@@ -1,7 +1,6 @@
-import Link from "next/link";
-import { Fragment } from "react";
+import { Breadcrumbs, type Crumb } from "@/components/shell/breadcrumbs";
 
-export type Breadcrumb = { label: string; href?: string };
+export type Breadcrumb = Crumb;
 
 export function PageHeader({
   title,
@@ -17,29 +16,7 @@ export function PageHeader({
   return (
     <div className="mb-6">
       {breadcrumbs?.length ? (
-        <nav aria-label="Breadcrumb" className="mb-2">
-          <ol className="flex flex-wrap items-center gap-1.5 text-caption">
-            {breadcrumbs.map((crumb, i) => (
-              <Fragment key={`${crumb.label}-${i}`}>
-                {i > 0 ? <li aria-hidden>/</li> : null}
-                <li>
-                  {crumb.href ? (
-                    <Link
-                      href={crumb.href}
-                      className="hover:text-foreground hover:underline"
-                    >
-                      {crumb.label}
-                    </Link>
-                  ) : (
-                    <span aria-current="page" className="text-foreground">
-                      {crumb.label}
-                    </span>
-                  )}
-                </li>
-              </Fragment>
-            ))}
-          </ol>
-        </nav>
+        <Breadcrumbs items={breadcrumbs} className="mb-2" />
       ) : null}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>

@@ -4,6 +4,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ProductCard } from "@/components/ui/product-card";
 import { GridIcon } from "@/components/icons";
 import { getProductAccess } from "@/lib/access";
+import { describeAvailability } from "@/lib/availability";
 
 export const metadata: Metadata = { title: "Product Switcher" };
 
@@ -26,13 +27,7 @@ export default async function SwitcherPage() {
             name={item.product.name}
             description={item.product.description}
             launchable={item.launchable}
-            unavailableReason={
-              !item.enabledForCompany
-                ? "Not enabled"
-                : item.product.status === "coming_soon"
-                  ? "Coming soon"
-                  : null
-            }
+            availability={describeAvailability(item)}
             href={`/launch/${item.product.key.toLowerCase()}`}
           />
         ))}
