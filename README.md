@@ -63,6 +63,22 @@ src/components/       UI primitives and app shell
 src/app/              Routes (login + authenticated app pages)
 ```
 
+## Developer notes
+
+- **Prisma engines behind proxies:** Prisma's postinstall downloads engine
+  binaries from `binaries.prisma.sh`. Some corporate/egress proxies reset
+  that download (the npm install fails with `ECONNRESET`/`aborted` in
+  `@prisma/engines`). Workaround: `npm install --ignore-scripts`, then fetch
+  the schema engine with `curl` and place it at
+  `node_modules/@prisma/engines/schema-engine-<platform>` (or point
+  `PRISMA_SCHEMA_ENGINE_BINARY` at it). `npx prisma version` confirms the
+  engine is picked up.
+- **Fresh clone:** `npm run db:setup` provisions everything — it generates
+  the Prisma client, creates the SQLite database, and seeds it.
+- **SQLite is local-development only.** The production database will be
+  PostgreSQL in a later milestone; keep schema changes portable (no
+  SQLite-specific SQL, statuses/enums stay as typed string constants).
+
 ## Database scripts
 
 | Script            | Purpose                                  |

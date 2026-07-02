@@ -202,10 +202,10 @@ async function main() {
   // Admin user with Platform Admin role on every product
   const admin = await db.user.upsert({
     where: { email: "admin@blueskyos.app" },
-    update: {},
+    update: { firstName: "BlueSky", lastName: "Admin" },
     create: {
       companyId: company.id,
-      firstName: "System",
+      firstName: "BlueSky",
       lastName: "Admin",
       email: "admin@blueskyos.app",
       status: "active",

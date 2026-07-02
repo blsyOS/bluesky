@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useState } from "react";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Badge, StatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -46,6 +46,10 @@ export function UsersTable({
 }) {
   const [inviteOpen, setInviteOpen] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [inviteState, inviteAction, invitePending] = useActionState(
+    createUser,
+    null
+  );
 
   return (
     <div className="space-y-4">
@@ -61,28 +65,59 @@ export function UsersTable({
         />
 
         {inviteOpen ? (
-          <form
-            action={createUser}
-            className="grid gap-4 border-b border-border bg-surface-muted/50 px-5 py-4 sm:grid-cols-2 lg:grid-cols-5"
-          >
-            <Field label="First name" htmlFor="invite-first">
-              <Input id="invite-first" name="firstName" required />
-            </Field>
-            <Field label="Last name" htmlFor="invite-last">
-              <Input id="invite-last" name="lastName" required />
-            </Field>
-            <Field label="Email" htmlFor="invite-email">
-              <Input id="invite-email" name="email" type="email" required />
-            </Field>
-            <Field label="Phone (optional)" htmlFor="invite-phone">
-              <Input id="invite-phone" name="phone" type="tel" />
-            </Field>
-            <div className="flex items-end">
-              <Button type="submit" className="w-full">
-                Send invite
-              </Button>
-            </div>
-          </form>
+          <div className="border-b border-border bg-surface-muted/50 px-5 py-4">
+            {inviteState?.error ? (
+              <p
+                role="alert"
+                className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-400"
+              >
+                {inviteState.error}
+              </p>
+            ) : null}
+            <form
+              action={inviteAction}
+              className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5"
+            >
+              <Field label="First name" htmlFor="invite-first">
+                <Input
+                  id="invite-first"
+                  name="firstName"
+                  defaultValue={inviteState?.values?.firstName ?? ""}
+                  required
+                />
+              </Field>
+              <Field label="Last name" htmlFor="invite-last">
+                <Input
+                  id="invite-last"
+                  name="lastName"
+                  defaultValue={inviteState?.values?.lastName ?? ""}
+                  required
+                />
+              </Field>
+              <Field label="Email" htmlFor="invite-email">
+                <Input
+                  id="invite-email"
+                  name="email"
+                  type="email"
+                  defaultValue={inviteState?.values?.email ?? ""}
+                  required
+                />
+              </Field>
+              <Field label="Phone (optional)" htmlFor="invite-phone">
+                <Input
+                  id="invite-phone"
+                  name="phone"
+                  type="tel"
+                  defaultValue={inviteState?.values?.phone ?? ""}
+                />
+              </Field>
+              <div className="flex items-end">
+                <Button type="submit" className="w-full" disabled={invitePending}>
+                  {invitePending ? "Inviting…" : "Send invite"}
+                </Button>
+              </div>
+            </form>
+          </div>
         ) : null}
 
         <Table>

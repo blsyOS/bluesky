@@ -5,26 +5,59 @@ import { db } from "@/lib/db";
 import { recordAudit } from "@/lib/audit";
 import { getCurrentSession } from "@/lib/session";
 import { USER_STATUSES } from "@/lib/constants";
+import {
+  DUPLICATE_EMAIL_ERROR,
+  parseNewUserInput,
+  type NewUserValues,
+} from "@/lib/validation";
 
-export async function createUser(formData: FormData) {
+export type CreateUserState = {
+  ok?: boolean;
+  error?: string;
+  /** Submitted values, echoed back so the form can repopulate on error. */
+  values?: NewUserValues;
+} | null;
+
+function isUniqueConstraintError(e: unknown) {
+  return (
+    typeof e === "object" && e !== null && "code" in e && e.code === "P2002"
+  );
+}
+
+export async function createUser(
+  _prevState: CreateUserState,
+  formData: FormData
+): Promise<CreateUserState> {
   const session = await getCurrentSession();
-  const firstName = String(formData.get("firstName") ?? "").trim();
-  const lastName = String(formData.get("lastName") ?? "").trim();
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  if (!firstName || !lastName || !email) {
-    throw new Error("First name, last name, and email are required.");
+  const parsed = parseNewUserInput(formData);
+  if (!parsed.ok) return { error: parsed.error, values: parsed.values };
+  const { firstName, lastName, email, phone } = parsed.data;
+
+  const existing = await db.user.findUnique({ where: { email } });
+  if (existing) {
+    return { error: DUPLICATE_EMAIL_ERROR, values: parsed.data };
   }
 
-  const user = await db.user.create({
-    data: {
-      companyId: session.company.id,
-      firstName,
-      lastName,
-      email,
-      phone: String(formData.get("phone") ?? "").trim() || null,
-      status: "invited",
-    },
-  });
+  let user;
+  try {
+    user = await db.user.create({
+      data: {
+        companyId: session.company.id,
+        firstName,
+        lastName,
+        email,
+        phone: phone || null,
+        status: "invited",
+      },
+    });
+  } catch (e) {
+    // The pre-check races with concurrent invites; the unique index is the
+    // real guard.
+    if (isUniqueConstraintError(e)) {
+      return { error: DUPLICATE_EMAIL_ERROR, values: parsed.data };
+    }
+    throw e;
+  }
 
   await recordAudit({
     companyId: session.company.id,
@@ -37,6 +70,7 @@ export async function createUser(formData: FormData) {
   });
 
   revalidatePath("/users");
+  return { ok: true };
 }
 
 export async function updateUser(formData: FormData) {
