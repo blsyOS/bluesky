@@ -3,7 +3,9 @@ import { PageHeader } from "@/components/page-header";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Badge, StatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Table, TBody, TD, TH, THead } from "@/components/ui/table";
+import { ProductGlyph } from "@/components/ui/product-card";
+import { Table, TBody, TD, TH, THead, TR, TableEmpty } from "@/components/ui/table";
+import { ToastForm } from "@/components/ui/toast-form";
 import { setCompanyProductStatus } from "@/lib/actions/companies";
 import { db } from "@/lib/db";
 import { getCurrentSession } from "@/lib/session";
@@ -48,22 +50,13 @@ export default async function ProductsPage() {
               const enabled =
                 license?.status === "active" || license?.status === "trial";
               return (
-                <tr key={product.id}>
+                <TR key={product.id}>
                   <TD>
                     <div className="flex items-center gap-3">
-                      <span
-                        className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg text-xs font-bold text-white"
-                        style={{
-                          backgroundColor: product.accentColor ?? "#64748b",
-                        }}
-                      >
-                        {product.name.slice(0, 2)}
-                      </span>
+                      <ProductGlyph name={product.name} productKey={product.key} />
                       <div>
                         <p className="font-medium">{product.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {product.description}
-                        </p>
+                        <p className="text-caption">{product.description}</p>
                       </div>
                     </div>
                   </TD>
@@ -74,14 +67,18 @@ export default async function ProductsPage() {
                     {license ? (
                       <StatusBadge status={license.status} />
                     ) : (
-                      <Badge tone="gray">not licensed</Badge>
+                      <Badge tone="neutral">not licensed</Badge>
                     )}
                   </TD>
                   <TD className="text-muted-foreground">
                     {license?.enabledAt ? formatDate(license.enabledAt) : "—"}
                   </TD>
                   <TD className="text-right">
-                    <form action={setCompanyProductStatus} className="inline">
+                    <ToastForm
+                      action={setCompanyProductStatus}
+                      successMessage={`${product.name} ${enabled ? "disabled" : "enabled"} for ${session.company.name}.`}
+                      className="inline"
+                    >
                       <input type="hidden" name="productId" value={product.id} />
                       <input
                         type="hidden"
@@ -89,7 +86,7 @@ export default async function ProductsPage() {
                         value={enabled ? "false" : "true"}
                       />
                       {enabled ? (
-                        <Button variant="danger" size="sm" type="submit">
+                        <Button variant="destructive" size="sm" type="submit">
                           Disable
                         </Button>
                       ) : (
@@ -97,11 +94,18 @@ export default async function ProductsPage() {
                           Enable
                         </Button>
                       )}
-                    </form>
+                    </ToastForm>
                   </TD>
-                </tr>
+                </TR>
               );
             })}
+            {products.length === 0 ? (
+              <TableEmpty
+                colSpan={5}
+                title="No products available"
+                description="Platform products will appear here."
+              />
+            ) : null}
           </TBody>
         </Table>
       </Card>

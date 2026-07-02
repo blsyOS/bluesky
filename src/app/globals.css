@@ -2,27 +2,64 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* ─────────────────────────────────────────────────────────────────────────
+   BlueSky OS design tokens
+
+   Semantic tokens live as CSS variables and are re-mapped per theme; the
+   @theme block exposes them as Tailwind utilities (bg-surface, text-success,
+   shadow-card, …). Components consume utilities only — never raw hex values.
+
+   Radius conventions: buttons/inputs/badges-in-rows `rounded-lg`,
+   cards/panels/modals `rounded-xl`, pills/avatars `rounded-full`.
+   Breakpoints: Tailwind defaults — sm 640 (mobile→), md 768 (tablet),
+   lg 1024 (desktop, sidebar docks), xl 1280 (wide desktop).
+   ──────────────────────────────────────────────────────────────────────── */
+
 :root {
-  /* Workspace */
+  /* Workspace neutrals */
   --background: #f6f8fb;
   --surface: #ffffff;
   --surface-muted: #f1f5f9;
   --foreground: #0f172a;
-  --muted-foreground: #64748b;
+  --muted-foreground: #5b6b81;
+  --faint-foreground: #94a3b8;
   --border: #e2e8f0;
+  --border-strong: #cbd5e1;
 
   /* Brand */
   --primary: #2563eb;
   --primary-hover: #1d4ed8;
   --primary-foreground: #ffffff;
 
-  /* Navy sidebar (constant across themes) */
+  /* Semantic status */
+  --success: #047857;
+  --warning: #b45309;
+  --danger: #b91c1c;
+  --info: #1d4ed8;
+
+  /* Navy navigation (constant across themes) */
   --sidebar: #0c1a2e;
   --sidebar-hover: #16263e;
   --sidebar-active: #1d3050;
   --sidebar-foreground: #cbd5e1;
   --sidebar-muted: #7d8ba1;
   --sidebar-border: #1c2c46;
+
+  /* Product accents (see src/lib/accents.ts) */
+  --accent-locate: #2563eb;
+  --accent-leak: #7c3aed;
+  --accent-fiber: #ea580c;
+  --accent-site: #16a34a;
+  --accent-command: #475569;
+
+  /* Generic accent slot — components read this; product surfaces override
+     it via style={accentStyle(key)} */
+  --accent: var(--primary);
+
+  /* Elevation */
+  --shadow-card: 0 1px 2px 0 rgb(15 23 42 / 0.05);
+  --shadow-raised: 0 1px 3px 0 rgb(15 23 42 / 0.08), 0 4px 12px -2px rgb(15 23 42 / 0.08);
+  --shadow-overlay: 0 4px 6px -2px rgb(15 23 42 / 0.08), 0 12px 32px -4px rgb(15 23 42 / 0.18);
 }
 
 .dark {
@@ -31,11 +68,18 @@
   --surface-muted: #16233a;
   --foreground: #e2e8f0;
   --muted-foreground: #8fa1b8;
+  --faint-foreground: #64748b;
   --border: #1e2c44;
+  --border-strong: #2c3d5c;
 
   --primary: #3b82f6;
   --primary-hover: #2563eb;
   --primary-foreground: #ffffff;
+
+  --success: #34d399;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --info: #60a5fa;
 
   --sidebar: #0a1322;
   --sidebar-hover: #131f33;
@@ -43,6 +87,16 @@
   --sidebar-foreground: #cbd5e1;
   --sidebar-muted: #7d8ba1;
   --sidebar-border: #182742;
+
+  --accent-locate: #3b82f6;
+  --accent-leak: #a78bfa;
+  --accent-fiber: #fb923c;
+  --accent-site: #4ade80;
+  --accent-command: #94a3b8;
+
+  --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+  --shadow-raised: 0 1px 3px 0 rgb(0 0 0 / 0.5), 0 4px 12px -2px rgb(0 0 0 / 0.5);
+  --shadow-overlay: 0 4px 6px -2px rgb(0 0 0 / 0.5), 0 12px 32px -4px rgb(0 0 0 / 0.7);
 }
 
 @theme inline {
@@ -51,11 +105,18 @@
   --color-surface-muted: var(--surface-muted);
   --color-foreground: var(--foreground);
   --color-muted-foreground: var(--muted-foreground);
+  --color-faint-foreground: var(--faint-foreground);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
 
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
   --color-primary-foreground: var(--primary-foreground);
+
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
 
   --color-sidebar: var(--sidebar);
   --color-sidebar-hover: var(--sidebar-hover);
@@ -64,13 +125,68 @@
   --color-sidebar-muted: var(--sidebar-muted);
   --color-sidebar-border: var(--sidebar-border);
 
+  --color-accent: var(--accent);
+
+  --shadow-card: var(--shadow-card);
+  --shadow-raised: var(--shadow-raised);
+  --shadow-overlay: var(--shadow-overlay);
+
   --font-sans:
     ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Typography scale — semantic text styles used across pages */
+@utility text-title-page {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+@utility text-title-section {
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+@utility text-title-card {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+}
+@utility text-body {
+  font-size: 0.875rem;
+  line-height: 1.4rem;
+}
+@utility text-caption {
+  font-size: 0.75rem;
+  line-height: 1.1rem;
+  color: var(--muted-foreground);
+}
+@utility text-label {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+@utility text-meta {
+  font-size: 0.6875rem;
+  line-height: 1rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--muted-foreground);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+}
+
+/* Consistent keyboard focus for anything interactive */
+:where(a, button, input, select, textarea, [role="switch"], [tabindex]):focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 0.25rem;
 }

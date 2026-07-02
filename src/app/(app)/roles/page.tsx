@@ -3,6 +3,8 @@ import { PageHeader } from "@/components/page-header";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/form";
+import { ToastForm } from "@/components/ui/toast-form";
 import { setRolePermissions } from "@/lib/actions/roles";
 import { db } from "@/lib/db";
 import { getCurrentSession } from "@/lib/session";
@@ -46,18 +48,22 @@ export default async function RolesPage() {
                 actions={
                   <div className="flex items-center gap-2">
                     {role.isSystemRole ? (
-                      <Badge tone="purple">System</Badge>
+                      <Badge tone="info">System</Badge>
                     ) : (
-                      <Badge tone="blue">Custom</Badge>
+                      <Badge tone="accent">Custom</Badge>
                     )}
-                    <Badge tone="gray">
+                    <Badge tone="neutral">
                       {role.product ? role.product.name : "Platform-wide"}
                     </Badge>
                   </div>
                 }
               />
               <CardBody>
-                <form action={setRolePermissions} className="space-y-3">
+                <ToastForm
+                  action={setRolePermissions}
+                  successMessage={`Permissions saved for ${role.name}.`}
+                  className="space-y-3"
+                >
                   <input type="hidden" name="roleId" value={role.id} />
                   <div className="space-y-2">
                     {permissions.map((permission) => (
@@ -65,12 +71,11 @@ export default async function RolesPage() {
                         key={permission.id}
                         className="flex cursor-pointer items-start gap-3 rounded-lg border border-border px-3 py-2.5 transition-colors hover:bg-surface-muted"
                       >
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           name="permissionIds"
                           value={permission.id}
                           defaultChecked={granted.has(permission.id)}
-                          className="mt-0.5 size-4 accent-[var(--primary)]"
+                          className="mt-0.5"
                         />
                         <span>
                           <span className="block text-sm font-medium">
@@ -80,7 +85,7 @@ export default async function RolesPage() {
                             </code>
                           </span>
                           {permission.description ? (
-                            <span className="block text-xs text-muted-foreground">
+                            <span className="block text-caption">
                               {permission.description}
                             </span>
                           ) : null}
@@ -89,7 +94,7 @@ export default async function RolesPage() {
                     ))}
                   </div>
                   <div className="flex items-center justify-between">
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-caption">
                       {role._count.userProductRoles} assignment
                       {role._count.userProductRoles === 1 ? "" : "s"}
                     </p>
@@ -97,7 +102,7 @@ export default async function RolesPage() {
                       Save permissions
                     </Button>
                   </div>
-                </form>
+                </ToastForm>
               </CardBody>
             </Card>
           );

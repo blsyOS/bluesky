@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { ProductAccess } from "@/lib/access";
 import { ChevronDownIcon, GridIcon } from "@/components/icons";
+import { Badge } from "@/components/ui/badge";
+import { ProductGlyph } from "@/components/ui/product-card";
 import { cn } from "@/lib/cn";
 
 /**
@@ -39,6 +41,7 @@ export function ProductSwitcher({ products }: { products: ProductAccess[] }) {
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
+        aria-haspopup="menu"
         className="inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-surface-muted hover:text-foreground cursor-pointer"
       >
         <GridIcon className="size-4.5" />
@@ -49,10 +52,8 @@ export function ProductSwitcher({ products }: { products: ProductAccess[] }) {
       </button>
 
       {open ? (
-        <div className="absolute left-0 z-50 mt-2 w-80 rounded-xl border border-border bg-surface p-2 shadow-lg">
-          <p className="px-3 pb-1 pt-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Your products
-          </p>
+        <div className="absolute left-0 z-50 mt-2 w-80 rounded-xl border border-border bg-surface p-2 shadow-overlay">
+          <p className="px-3 pb-1 pt-2 text-meta">Your products</p>
           <ul>
             {visible.map((item) => {
               const unavailableReason = !item.enabledForCompany
@@ -62,22 +63,28 @@ export function ProductSwitcher({ products }: { products: ProductAccess[] }) {
                   : null;
               const content = (
                 <>
-                  <span
-                    className="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold text-white"
-                    style={{ backgroundColor: item.product.accentColor ?? "#64748b" }}
-                  >
-                    {item.product.name.slice(0, 2)}
-                  </span>
+                  <ProductGlyph
+                    name={item.product.name}
+                    productKey={item.product.key}
+                    size="sm"
+                    className="mt-0.5"
+                  />
                   <span className="min-w-0">
                     <span className="flex items-center gap-2 text-sm font-medium">
                       {item.product.name}
                       {unavailableReason ? (
-                        <span className="rounded-full bg-surface-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                        <Badge
+                          tone={
+                            unavailableReason === "Coming soon"
+                              ? "warning"
+                              : "neutral"
+                          }
+                        >
                           {unavailableReason}
-                        </span>
+                        </Badge>
                       ) : null}
                     </span>
-                    <span className="block truncate text-xs text-muted-foreground">
+                    <span className="block truncate text-caption">
                       {item.product.description}
                     </span>
                   </span>

@@ -47,8 +47,8 @@ export default async function UsersPage() {
           access: u.productRoles.map((pr) => ({
             id: pr.id,
             productId: pr.productId,
+            productKey: pr.product.key,
             productName: pr.product.name,
-            accentColor: pr.product.accentColor,
             roleName: pr.role.name,
           })),
         }))}

@@ -2,7 +2,16 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
+import { KpiCard } from "@/components/ui/kpi-card";
 import { StatusBadge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ProductGlyph } from "@/components/ui/product-card";
+import {
+  BoxesIcon,
+  ScrollIcon,
+  ShieldIcon,
+  UsersIcon,
+} from "@/components/icons";
 import { db } from "@/lib/db";
 import { getCurrentSession } from "@/lib/session";
 import { getProductAccess } from "@/lib/access";
@@ -32,13 +41,6 @@ export default async function DashboardPage() {
 
   const enabledProducts = products.filter((p) => p.enabledForCompany);
 
-  const stats = [
-    { label: "Products enabled", value: enabledProducts.length, href: "/products" },
-    { label: "Users", value: userCount, href: "/users" },
-    { label: "Roles", value: roleCount, href: "/roles" },
-    { label: "Audit events", value: auditCount, href: "/audit-logs" },
-  ];
-
   return (
     <>
       <PageHeader
@@ -47,20 +49,34 @@ export default async function DashboardPage() {
       />
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {stats.map((stat) => (
-          <Link key={stat.label} href={stat.href}>
-            <Card className="transition-shadow hover:shadow-md">
-              <CardBody>
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  {stat.label}
-                </p>
-                <p className="mt-2 text-3xl font-semibold tracking-tight">
-                  {stat.value}
-                </p>
-              </CardBody>
-            </Card>
-          </Link>
-        ))}
+        <KpiCard
+          title="Products enabled"
+          value={enabledProducts.length}
+          helper={`of ${products.length} available`}
+          icon={<BoxesIcon />}
+          href="/products"
+        />
+        <KpiCard
+          title="Users"
+          value={userCount}
+          helper="in your company"
+          icon={<UsersIcon />}
+          href="/users"
+        />
+        <KpiCard
+          title="Roles"
+          value={roleCount}
+          helper="system & custom"
+          icon={<ShieldIcon />}
+          href="/roles"
+        />
+        <KpiCard
+          title="Audit events"
+          value={auditCount}
+          helper="recorded actions"
+          icon={<ScrollIcon />}
+          href="/audit-logs"
+        />
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-5">
@@ -81,19 +97,15 @@ export default async function DashboardPage() {
             {enabledProducts.map((item) => (
               <div
                 key={item.product.id}
-                className="flex items-center gap-3 rounded-lg border border-border px-4 py-3"
+                className="flex items-center gap-3 rounded-lg border border-border px-4 py-3 transition-colors hover:bg-surface-muted/40"
               >
-                <span
-                  className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg text-xs font-bold text-white"
-                  style={{
-                    backgroundColor: item.product.accentColor ?? "#64748b",
-                  }}
-                >
-                  {item.product.name.slice(0, 2)}
-                </span>
+                <ProductGlyph
+                  name={item.product.name}
+                  productKey={item.product.key}
+                />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium">{item.product.name}</p>
-                  <p className="truncate text-xs text-muted-foreground">
+                  <p className="truncate text-caption">
                     {item.product.description}
                   </p>
                 </div>
@@ -101,9 +113,11 @@ export default async function DashboardPage() {
               </div>
             ))}
             {enabledProducts.length === 0 ? (
-              <p className="py-4 text-sm text-muted-foreground">
-                No products enabled yet.
-              </p>
+              <EmptyState
+                title="No products enabled"
+                description="Enable products for your company to see them here."
+                icon={<BoxesIcon />}
+              />
             ) : null}
           </CardBody>
         </Card>
@@ -124,15 +138,16 @@ export default async function DashboardPage() {
           <CardBody className="space-y-4">
             {recentActivity.map((entry) => (
               <div key={entry.id} className="flex gap-3">
-                <span className="mt-1.5 size-2 shrink-0 rounded-full bg-primary" />
+                <span
+                  aria-hidden
+                  className="mt-1.5 size-2 shrink-0 rounded-full bg-primary"
+                />
                 <div className="min-w-0">
                   <p className="text-sm font-medium">
                     {humanizeAction(entry.action)}
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    {entry.description}
-                  </p>
-                  <p className="mt-0.5 text-xs text-muted-foreground/70">
+                  <p className="text-caption">{entry.description}</p>
+                  <p className="mt-0.5 text-xs text-faint-foreground">
                     {formatDateTime(entry.createdAt)}
                     {entry.user
                       ? ` · ${entry.user.firstName} ${entry.user.lastName}`
@@ -142,9 +157,11 @@ export default async function DashboardPage() {
               </div>
             ))}
             {recentActivity.length === 0 ? (
-              <p className="py-4 text-sm text-muted-foreground">
-                No activity yet.
-              </p>
+              <EmptyState
+                title="No activity yet"
+                description="Admin actions will appear here as they happen."
+                icon={<ScrollIcon />}
+              />
             ) : null}
           </CardBody>
         </Card>

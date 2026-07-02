@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Table, TBody, TD, TH, THead } from "@/components/ui/table";
+import { Table, TBody, TD, TH, THead, TR, TableEmpty } from "@/components/ui/table";
 import { listAuditLogs } from "@/lib/actions/audit-logs";
 import { formatDateTime, humanizeAction } from "@/lib/format";
 
@@ -42,12 +42,12 @@ export default async function AuditLogsPage({
           </THead>
           <TBody>
             {entries.map((entry) => (
-              <tr key={entry.id}>
+              <TR key={entry.id}>
                 <TD className="whitespace-nowrap text-muted-foreground">
                   {formatDateTime(entry.createdAt)}
                 </TD>
                 <TD>
-                  <Badge tone="blue">{humanizeAction(entry.action)}</Badge>
+                  <Badge tone="info">{humanizeAction(entry.action)}</Badge>
                 </TD>
                 <TD className="max-w-md">
                   <p>{entry.description}</p>
@@ -60,14 +60,14 @@ export default async function AuditLogsPage({
                 <TD className="whitespace-nowrap text-muted-foreground">
                   {entry.entityType}
                 </TD>
-              </tr>
+              </TR>
             ))}
             {entries.length === 0 ? (
-              <tr>
-                <TD colSpan={5} className="py-10 text-center text-muted-foreground">
-                  No audit events yet.
-                </TD>
-              </tr>
+              <TableEmpty
+                colSpan={5}
+                title="No audit events yet"
+                description="Admin actions are recorded here automatically."
+              />
             ) : null}
           </TBody>
         </Table>
