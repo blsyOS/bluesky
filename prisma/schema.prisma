@@ -1,0 +1,190 @@
+// BlueSky OS — Multi-Tenant Platform Foundation
+//
+// Company is the top-level tenant object. Products belong to the platform
+// and are licensed to companies through CompanyProduct. Users belong to one
+// company; their access to products is controlled through UserProductRole.
+//
+// SQLite does not support native enums, so status/key fields are strings
+// constrained by the typed constants in src/lib/constants.ts.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Company {
+  id           String   @id @default(cuid())
+  name         String
+  legalName    String?
+  slug         String   @unique
+  subdomain    String   @unique
+  status       String   @default("active") // active | inactive | suspended
+  logoUrl      String?
+  primaryColor String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  users     User[]
+  products  CompanyProduct[]
+  roles     Role[]
+  auditLogs AuditLog[]
+  settings  CompanySettings?
+
+  @@map("companies")
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  key         String   @unique // LOCATE_OS | LEAK_OS | FIBER_OS | SITE_VIEW | COMMAND_CENTER
+  name        String
+  description String?
+  status      String   @default("active") // active | coming_soon | hidden
+  accentColor String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  companies        CompanyProduct[]
+  roles            Role[]
+  permissions      Permission[]
+  userProductRoles UserProductRole[]
+
+  @@map("products")
+}
+
+model CompanyProduct {
+  id         String    @id @default(cuid())
+  companyId  String
+  productId  String
+  status     String    @default("active") // active | trial | disabled
+  enabledAt  DateTime?
+  disabledAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, productId])
+  @@map("company_products")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  companyId String
+  firstName String
+  lastName  String
+  email     String   @unique
+  phone     String?
+  avatarUrl String?
+  status    String   @default("invited") // active | inactive | invited | suspended
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company      Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  productRoles UserProductRole[]
+  auditLogs    AuditLog[]
+
+  @@index([companyId])
+  @@map("users")
+}
+
+model Role {
+  id           String   @id @default(cuid())
+  companyId    String? // null = system role available to all companies
+  productId    String? // null = platform-wide role
+  name         String
+  key          String
+  description  String?
+  isSystemRole Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  company          Company?          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  product          Product?          @relation(fields: [productId], references: [id], onDelete: Cascade)
+  permissions      RolePermission[]
+  userProductRoles UserProductRole[]
+
+  @@unique([companyId, productId, key])
+  @@map("roles")
+}
+
+model Permission {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  name        String
+  description String?
+  productId   String? // null = platform-wide permission
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  product Product?         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  roles   RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           String @id @default(cuid())
+  roleId       String
+  permissionId String
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model UserProductRole {
+  id        String @id @default(cuid())
+  userId    String
+  productId String
+  roleId    String
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  role    Role    @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId, roleId])
+  @@index([userId])
+  @@map("user_product_roles")
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  companyId   String
+  userId      String?
+  action      String // e.g. user.created, company_product.enabled
+  entityType  String
+  entityId    String?
+  description String
+  metadata    String? // JSON payload
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, createdAt])
+  @@map("audit_logs")
+}
+
+model CompanySettings {
+  id           String   @id @default(cuid())
+  companyId    String   @unique
+  timezone     String   @default("America/Chicago")
+  dateFormat   String   @default("MM/DD/YYYY")
+  timeFormat   String   @default("12h")
+  defaultTheme String   @default("system") // light | dark | system
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("company_settings")
+}
