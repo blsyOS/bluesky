@@ -19,6 +19,7 @@ import {
 import { Logo, LogoMark } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { AutoBreadcrumbs } from "@/components/shell/breadcrumbs";
+import { SearchLauncher } from "@/components/search/search-launcher";
 import { ProductSwitcher } from "@/components/shell/product-switcher";
 import { UserMenu, type MenuUser } from "@/components/shell/user-menu";
 import { accentStyle } from "@/lib/accents";
@@ -318,8 +319,13 @@ export function AppShell({
           </button>
           <AutoBreadcrumbs productNames={productNames} className="min-w-0" />
 
-          {/* Center: reserved for global search (future build order) */}
-          <div className="flex-1" data-slot="search" />
+          {/* Center: global search / command palette */}
+          <div
+            className="flex flex-1 items-center justify-end sm:justify-center sm:px-4"
+            data-slot="search"
+          >
+            <SearchLauncher />
+          </div>
 
           {/* Right: product switcher, theme, profile.
               A notifications button will slot in before the theme toggle. */}

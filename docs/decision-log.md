@@ -47,3 +47,24 @@ Append-only record of platform-level decisions. Newest entries last.
 - **Topbar reserves growth slots**: center `data-slot="search"` for the
   future command palette/search, right cluster ordered for a notifications
   button.
+
+## BO-01.03B — Global Search & Command Palette
+
+- **Registry pattern for search**: a single `searchRegistry`
+  (`src/lib/search/registry.ts`) that modules register
+  providers/categories/quick actions into via side-effect imports;
+  providers never know about each other, and queries fan out with
+  `Promise.allSettled` so one failing provider can't break search.
+- **Quick actions receive a UI-agnostic `QuickActionContext`**
+  (`navigate/toggleTheme/notify/close`) instead of touching React or the
+  router directly — actions stay unit-testable and portable.
+- **The palette is code-split** (`next/dynamic`, `ssr: false`) behind
+  `SearchLauncher`, which owns the single global instance and the ⌘K /
+  Ctrl+K binding; the chunk loads on first open, keeping initial page
+  load unaffected.
+- **One document-level keyboard listener** (`src/lib/shortcuts.ts`
+  ShortcutManager) dispatches all global shortcuts; components bind via
+  `useGlobalShortcut` so bindings never stack duplicate listeners.
+- **Recent searches sit behind a `RecentSearchStore` interface** with an
+  intentionally non-persistent in-memory implementation; persistence is
+  deferred to authenticated user preferences.
