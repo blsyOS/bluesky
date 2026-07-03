@@ -1,66 +1,41 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/page-header";
-import { PlatformDashboard } from "@/components/dashboards/platform-dashboard";
-import type { PlatformDashboardData } from "@/lib/dashboards/providers/platform";
-import { db } from "@/lib/db";
+import { DashboardView } from "@/components/dashboards/dashboard-view";
+import { DASHBOARDS } from "@/lib/dashboards/catalog";
+import { resolveDefaultDashboard } from "@/lib/dashboards/roles";
+import { loadPlatformStats } from "@/lib/dashboards/platform-stats";
 import { getCurrentSession } from "@/lib/session";
-import { getProductAccess } from "@/lib/access";
-import { humanizeAction } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
+/**
+ * The operational landing page. The dashboard shown is chosen by the
+ * user's role (resolveDefaultDashboard); platform is the default and the
+ * only fully implemented surface today.
+ */
 export default async function DashboardPage() {
   const session = await getCurrentSession();
-  const companyId = session.company.id;
+  const roleKeys = session.user.productRoles.map((pr) => pr.role.key);
+  const dashboardId = resolveDefaultDashboard(roleKeys);
 
-  const [products, userCount, roleCount, auditCount, recentActivity] =
-    await Promise.all([
-      getProductAccess(),
-      db.user.count({ where: { companyId } }),
-      db.role.count({
-        where: { OR: [{ isSystemRole: true }, { companyId }] },
-      }),
-      db.auditLog.count({ where: { companyId } }),
-      db.auditLog.findMany({
-        where: { companyId },
-        include: { user: true },
-        orderBy: { createdAt: "desc" },
-        take: 8,
-      }),
-    ]);
+  if (dashboardId === "platform") {
+    const stats = await loadPlatformStats(session.company.id);
+    return (
+      <>
+        <PageHeader
+          title={`Welcome back, ${session.user.firstName}`}
+          description={`Here's what needs attention across ${session.company.name}.`}
+        />
+        <DashboardView dashboardId="platform" stats={stats} />
+      </>
+    );
+  }
 
-  const enabledProducts = products.filter((p) => p.enabledForCompany);
-
-  const stats: PlatformDashboardData = {
-    productsEnabled: enabledProducts.length,
-    productsTotal: products.length,
-    userCount,
-    roleCount,
-    auditCount,
-    products: enabledProducts.map((item) => ({
-      key: item.product.key,
-      name: item.product.name,
-      description: item.product.description,
-      licenseStatus: item.licenseStatus ?? "disabled",
-    })),
-    activity: recentActivity.map((entry) => ({
-      id: entry.id,
-      title: humanizeAction(entry.action),
-      description: entry.user
-        ? `${entry.description} — ${entry.user.firstName} ${entry.user.lastName}`
-        : entry.description,
-      timestamp: entry.createdAt.toISOString(),
-    })),
-    loadedAt: new Date().toISOString(),
-  };
-
+  const meta = DASHBOARDS[dashboardId];
   return (
     <>
-      <PageHeader
-        title={`Welcome back, ${session.user.firstName}`}
-        description={`Here's what's happening across ${session.company.name}.`}
-      />
-      <PlatformDashboard stats={stats} />
+      <PageHeader title={`${meta.title} dashboard`} description={meta.description} />
+      <DashboardView dashboardId={dashboardId} />
     </>
   );
 }

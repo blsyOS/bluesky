@@ -62,7 +62,8 @@ export function DashboardSection({
  * The reusable dashboard engine surface. Loads widgets for
  * `context.dashboardId` from the registry (failure-isolated), groups them
  * into category sections, and renders the responsive grid with loading,
- * empty, and error states. Hiding a widget is session-only.
+ * empty, and error states. Rendering never fails because a provider has
+ * no data — scaffolded dashboards fall through to the empty state.
  */
 export function Dashboard({ context }: { context: DashboardContext }) {
   const router = useRouter();
@@ -70,7 +71,6 @@ export function Dashboard({ context }: { context: DashboardContext }) {
 
   const [sections, setSections] = useState<DashboardSectionData[] | null>(null);
   const [failed, setFailed] = useState(false);
-  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
   const [version, setVersion] = useState(0);
 
   useEffect(() => {
@@ -102,27 +102,9 @@ export function Dashboard({ context }: { context: DashboardContext }) {
       navigate: (href: string) => router.push(href),
       notify: (message: string) => toast("info", message),
       refresh,
-      // configure is bound per-card inside WidgetCard.
-      configure: () => {},
-      hide: () => {},
     }),
     [router, toast, refresh]
   );
-
-  function hideWidget(id: string) {
-    setHiddenIds((current) => new Set(current).add(id));
-    toast("info", "Widget hidden for this session. It returns on reload.");
-  }
-
-  const visibleSections = useMemo(() => {
-    if (!sections) return null;
-    return sections
-      .map((s) => ({
-        ...s,
-        widgets: s.widgets.filter((w) => !hiddenIds.has(w.id)),
-      }))
-      .filter((s) => s.widgets.length > 0);
-  }, [sections, hiddenIds]);
 
   if (failed) {
     return (
@@ -151,14 +133,14 @@ export function Dashboard({ context }: { context: DashboardContext }) {
     );
   }
 
-  if (visibleSections === null) return <DashboardSkeleton />;
+  if (sections === null) return <DashboardSkeleton />;
 
-  if (visibleSections.length === 0) {
+  if (sections.length === 0) {
     return (
       <EmptyState
         icon={<DashboardIcon />}
-        title="Nothing on this dashboard yet"
-        description="Widgets will appear here as modules come online."
+        title="This dashboard is coming online"
+        description="Its widgets connect when the module's build order is complete."
         className="py-16"
       />
     );
@@ -166,17 +148,11 @@ export function Dashboard({ context }: { context: DashboardContext }) {
 
   return (
     <div className="space-y-7">
-      {visibleSections.map((section) => (
+      {sections.map((section) => (
         <DashboardSection key={section.category.id} section={section}>
           {section.widgets.map((widget: DashboardWidget) => (
             <div key={widget.id} className={cn(SIZE_CLASSES[widget.size])}>
-              <WidgetCard
-                widget={widget}
-                context={{
-                  ...actionContext,
-                  hide: () => hideWidget(widget.id),
-                }}
-              />
+              <WidgetCard widget={widget} context={actionContext} />
             </div>
           ))}
         </DashboardSection>

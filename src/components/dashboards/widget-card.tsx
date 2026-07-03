@@ -1,20 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TrendIndicator } from "@/components/ui/kpi-card";
 import { usePopover } from "@/components/shell/use-popover";
-import {
-  ArrowRightIcon,
-  ChevronDownIcon,
-  InboxIcon,
-  SettingsIcon,
-} from "@/components/icons";
+import { ArrowRightIcon, ChevronDownIcon } from "@/components/icons";
 import type {
   DashboardWidget,
   WidgetAction,
@@ -24,16 +16,20 @@ import { accentStyle } from "@/lib/accents";
 import { formatRelativeTime } from "@/lib/format";
 import { cn } from "@/lib/cn";
 
-/** Standard actions every widget gets; widget-defined actions append. */
+/**
+ * Standard actions every widget gets; widget-defined actions (e.g. Retry)
+ * are prepended. Kept intentionally small — View Details and Refresh —
+ * after the BO-01.03E cleanup removed the framework-testing Configure and
+ * Hide placeholders.
+ */
 const STANDARD_ACTIONS: WidgetAction[] = [
   {
     id: "view-details",
     label: "View details",
-    perform: (ctx) => ctx.notify("Widget detail views arrive with module build orders."),
+    perform: (ctx) =>
+      ctx.notify("Widget detail views arrive with module build orders."),
   },
   { id: "refresh", label: "Refresh", perform: (ctx) => ctx.refresh() },
-  { id: "configure", label: "Configure", perform: (ctx) => ctx.configure() },
-  { id: "hide", label: "Hide widget", perform: (ctx) => ctx.hide() },
 ];
 
 function WidgetActionMenu({
@@ -58,7 +54,9 @@ function WidgetActionMenu({
         aria-label={`Actions for ${widget.title}`}
         className="flex size-8 items-center justify-center rounded-lg text-faint-foreground transition-colors hover:bg-surface-muted hover:text-foreground"
       >
-        <ChevronDownIcon className={cn("size-4 transition-transform", open && "rotate-180")} />
+        <ChevronDownIcon
+          className={cn("size-4 transition-transform", open && "rotate-180")}
+        />
       </button>
       {open ? (
         <div
@@ -86,36 +84,17 @@ function WidgetActionMenu({
   );
 }
 
-/** Future-ready configuration placeholder shown in place of the body. */
-function WidgetConfigPlaceholder({ onBack }: { onBack: () => void }) {
-  return (
-    <div className="flex flex-col items-center py-6 text-center">
-      <span className="inline-flex size-10 items-center justify-center rounded-full bg-surface-muted text-muted-foreground">
-        <SettingsIcon className="size-5" />
-      </span>
-      <p className="mt-3 text-sm font-medium">Widget configuration</p>
-      <p className="mt-1 max-w-55 text-caption">
-        Sizing, thresholds, and data options arrive with user dashboard
-        preferences in a later build order.
-      </p>
-      <Button size="sm" variant="secondary" className="mt-4" onClick={onBack}>
-        Back to widget
-      </Button>
-    </div>
-  );
-}
-
 function WidgetBody({ widget }: { widget: DashboardWidget }) {
   const state = widget.state ?? "ready";
 
   if (widget.status === "coming_soon") {
     return (
-      <EmptyState
-        icon={widget.icon ? <widget.icon /> : <InboxIcon />}
-        title="Coming soon"
-        description={widget.description ?? "This widget arrives with a later build order."}
-        className="py-6"
-      />
+      <div>
+        <p className="text-lg font-semibold text-faint-foreground">Coming soon</p>
+        <p className="mt-1 text-caption">
+          {widget.description ?? "This widget arrives with a later build order."}
+        </p>
+      </div>
     );
   }
   if (state === "loading") {
@@ -141,12 +120,16 @@ function WidgetBody({ widget }: { widget: DashboardWidget }) {
     );
   }
   if (state === "empty") {
+    // Compact "awaiting data" form — reads like a KPI with no value yet.
     return (
-      <EmptyState
-        icon={<InboxIcon />}
-        title={widget.emptyMessage ?? "Nothing to show yet"}
-        className="py-6"
-      />
+      <div>
+        <p className="text-3xl font-semibold tracking-tight text-faint-foreground">
+          —
+        </p>
+        <p className="mt-1 text-caption">
+          {widget.emptyMessage ?? "No data yet."}
+        </p>
+      </div>
     );
   }
 
@@ -178,9 +161,10 @@ function WidgetBody({ widget }: { widget: DashboardWidget }) {
 }
 
 /**
- * The reusable dashboard widget card. Everything a module widget needs:
- * accent-aware icon tile, status badge, action menu, all body states, a
- * configuration placeholder, footer, and an "updated … ago" timestamp.
+ * The reusable dashboard widget card, the standard card across every
+ * dashboard. Supports the four widget states (loading / empty / success /
+ * error), an accent-aware icon, a status badge, an action menu, footer,
+ * and an "updated … ago" timestamp.
  */
 export function WidgetCard({
   widget,
@@ -189,7 +173,6 @@ export function WidgetCard({
   widget: DashboardWidget;
   context: WidgetActionContext;
 }) {
-  const [configuring, setConfiguring] = useState(false);
   const comingSoon = widget.status === "coming_soon";
 
   return (
@@ -212,18 +195,11 @@ export function WidgetCard({
           ) : null}
         </div>
         {comingSoon ? <Badge tone="warning">Coming soon</Badge> : null}
-        <WidgetActionMenu
-          widget={widget}
-          context={{ ...context, configure: () => setConfiguring(true) }}
-        />
+        <WidgetActionMenu widget={widget} context={context} />
       </div>
 
       <div className="flex-1 px-4 pb-3 sm:px-5">
-        {configuring ? (
-          <WidgetConfigPlaceholder onBack={() => setConfiguring(false)} />
-        ) : (
-          <WidgetBody widget={widget} />
-        )}
+        <WidgetBody widget={widget} />
       </div>
 
       {widget.footer || widget.timestamp || widget.href ? (

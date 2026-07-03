@@ -49,10 +49,6 @@ export type WidgetActionContext = {
   notify: (message: string) => void;
   /** Re-runs provider loading for the whole dashboard. */
   refresh: () => void;
-  /** Hides the widget for this session (no persistence yet). */
-  hide: () => void;
-  /** Opens the widget configuration placeholder. */
-  configure: () => void;
 };
 
 export type WidgetAction = {

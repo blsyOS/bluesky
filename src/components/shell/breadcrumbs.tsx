@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Fragment } from "react";
+import { DASHBOARDS, type DashboardId } from "@/lib/dashboards/catalog";
 import { cn } from "@/lib/cn";
 
 export type Crumb = { label: string; href?: string };
@@ -100,6 +101,9 @@ export function AutoBreadcrumbs({
   const items: Crumb[] = [{ label: "Dashboard", href: "/dashboard" }];
   if (segments[0] === "launch" && segments[1]) {
     items.push({ label: productNames[segments[1]] ?? segments[1] });
+  } else if (segments[0] === "dashboard" && segments[1]) {
+    // /dashboard/<id> — a specific module or role dashboard.
+    items.push({ label: DASHBOARDS[segments[1] as DashboardId]?.title ?? segments[1] });
   } else if (segments[0] && segments[0] !== "dashboard") {
     const label =
       ROUTE_LABELS[segments[0]] ??

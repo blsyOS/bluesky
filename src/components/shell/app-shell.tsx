@@ -7,12 +7,19 @@ import type { ProductAccess } from "@/lib/access";
 import {
   BoxesIcon,
   BuildingIcon,
+  ChartBarIcon,
   ChevronDownIcon,
+  ContactIcon,
   DashboardIcon,
+  DropletIcon,
+  MapPinIcon,
   MenuIcon,
+  RouteIcon,
   ScrollIcon,
   SettingsIcon,
   ShieldIcon,
+  StormIcon,
+  TruckIcon,
   UsersIcon,
   XIcon,
 } from "@/components/icons";
@@ -26,17 +33,40 @@ import { UserMenu, type MenuUser } from "@/components/shell/user-menu";
 import { accentStyle } from "@/lib/accents";
 import { cn } from "@/lib/cn";
 
-const NAV_SECTIONS = [
+type NavItem = {
+  href: string;
+  label: string;
+  icon: typeof DashboardIcon;
+  /** Active only on an exact path match (used for the /dashboard root). */
+  exact?: boolean;
+};
+
+// The sidebar is the primary way to reach modules; the dashboard is the
+// operational command center, not a navigation page. Module entries route
+// to their (scaffolded) dashboards under /dashboard/<id>.
+const NAV_SECTIONS: Array<{ label: string; items: NavItem[] }> = [
   {
     label: "Workspace",
     items: [
-      { href: "/dashboard", label: "Dashboard", icon: DashboardIcon },
-      { href: "/products", label: "Products", icon: BoxesIcon },
+      { href: "/dashboard", label: "Dashboard", icon: DashboardIcon, exact: true },
+    ],
+  },
+  {
+    label: "Modules",
+    items: [
+      { href: "/dashboard/locate", label: "Locate", icon: MapPinIcon },
+      { href: "/dashboard/storm", label: "Storm", icon: StormIcon },
+      { href: "/dashboard/leak", label: "Leak", icon: DropletIcon },
+      { href: "/dashboard/dispatch", label: "Dispatch", icon: RouteIcon },
+      { href: "/dashboard/fleet", label: "Fleet", icon: TruckIcon },
+      { href: "/dashboard/customers", label: "Customers", icon: ContactIcon },
+      { href: "/dashboard/reports", label: "Reports", icon: ChartBarIcon },
     ],
   },
   {
     label: "Administration",
     items: [
+      { href: "/products", label: "Products", icon: BoxesIcon },
       { href: "/users", label: "Users", icon: UsersIcon },
       { href: "/roles", label: "Roles & Permissions", icon: ShieldIcon },
       { href: "/audit-logs", label: "Audit Logs", icon: ScrollIcon },
@@ -163,9 +193,10 @@ export function AppShell({
               )}
               <div className="space-y-0.5">
                 {section.items.map((item) => {
-                  const active =
-                    pathname === item.href ||
-                    pathname.startsWith(`${item.href}/`);
+                  const active = item.exact
+                    ? pathname === item.href
+                    : pathname === item.href ||
+                      pathname.startsWith(`${item.href}/`);
                   return (
                     <Link
                       key={item.href}

@@ -111,6 +111,29 @@ Append-only record of platform-level decisions. Newest entries last.
   Configure / Hide), with widget-defined actions prepended — modules add
   actions without touching the engine.
 
+## BO-01.03E — Operational Dashboard Migration
+
+- **The dashboard engine (BO-01.03D) is frozen as the platform standard**;
+  this migration only added catalog/routing data, providers, and widget
+  cleanup — no registry/grid/WidgetCard-architecture changes.
+- **Server-safe dashboard catalog** (`src/lib/dashboards/catalog.ts`):
+  plain data naming all 13 dashboards, consumed by routing, breadcrumbs,
+  and tests without importing client widget code. The registry remains the
+  runtime widget source.
+- **Role → dashboard routing is pure and table-driven**
+  (`resolveDefaultDashboard`), defaulting to the Platform command center;
+  persistence/override is deferred to a user-preferences build order.
+- **Platform dashboard shows operations, not a product catalog.** Products
+  moved to the sidebar. Operational Operations/System/Quality widgets with
+  no backend render honest empty states (no invented data); Activity reuses
+  the BO-01.03C ActivityCenter with real audit entries.
+- **Module dashboards scaffold via `registerModuleDashboard`** — empty-state
+  widgets only, so a module build order swaps in a real widget provider
+  without touching routing or the engine.
+- **Widget cleanup**: removed the Configure placeholder and session-only
+  Hide action (and their context methods) introduced for framework testing;
+  kept View Details, Refresh, and Retry.
+
 ## Visual refresh (post BO-01.03B)
 
 - **Light navigation shell**: the sidebar is light in light mode (white

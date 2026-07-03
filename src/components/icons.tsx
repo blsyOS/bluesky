@@ -162,6 +162,72 @@ export function SparkleIcon(props: IconProps) {
   );
 }
 
+export function MapPinIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M12 21s6-5.3 6-10a6 6 0 10-12 0c0 4.7 6 10 6 10z" />
+      <circle cx="12" cy="11" r="2.3" />
+    </Icon>
+  );
+}
+
+export function StormIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M17 14a4 4 0 00-1-7.9A5.5 5.5 0 005.5 8 4 4 0 006 14" />
+      <path d="M13 12l-3 4h3l-1 4 4-5h-3l1-3z" />
+    </Icon>
+  );
+}
+
+export function DropletIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M12 3.5s6 6 6 10a6 6 0 01-12 0c0-4 6-10 6-10z" />
+    </Icon>
+  );
+}
+
+export function RouteIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="6" cy="18" r="2.5" />
+      <circle cx="18" cy="6" r="2.5" />
+      <path d="M8.5 18H14a3.5 3.5 0 000-7H10a3.5 3.5 0 010-7h5.5" />
+    </Icon>
+  );
+}
+
+export function TruckIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M3 6.5h10v9H3zM13 9.5h4l3 3v3h-7z" />
+      <circle cx="7" cy="17.5" r="1.6" />
+      <circle cx="16.5" cy="17.5" r="1.6" />
+    </Icon>
+  );
+}
+
+export function ContactIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <rect x="4" y="4" width="16" height="16" rx="2" />
+      <circle cx="12" cy="10" r="2.3" />
+      <path d="M8.5 16.5a3.5 3.5 0 017 0" />
+    </Icon>
+  );
+}
+
+export function ChartBarIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M4 20V4" />
+      <path d="M8 20v-6M13 20V9M18 20v-9" />
+      <path d="M4 20h16" />
+    </Icon>
+  );
+}
+
 export function BellIcon(props: IconProps) {
   return (
     <Icon {...props}>

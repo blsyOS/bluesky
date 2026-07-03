@@ -1,43 +1,32 @@
 import {
+  BellIcon,
   BoxesIcon,
   ScrollIcon,
   SearchIcon,
   SettingsIcon,
   ShieldIcon,
-  SparkleIcon,
   UsersIcon,
 } from "@/components/icons";
 import { ActivityCenter } from "@/components/notifications/activity-center";
-import { ProductGlyph } from "@/components/ui/product-card";
-import { StatusBadge } from "@/components/ui/badge";
 import type { ActivityEntry } from "@/lib/notifications/types";
 import { CORE_WIDGET_CATEGORIES } from "../categories";
 import { dashboardRegistry } from "../registry";
-import type { DashboardWidget } from "../types";
+import type { DashboardWidget, WidgetIconComponent } from "../types";
 
 /**
- * Built-in platform dashboard provider. Widgets surface data the platform
- * already has (seeded counts, products, audit activity) — the host page
- * fetches it server-side and passes it through DashboardContext.data.
- * This provider owns the shape of `data.platform`; the engine stays
- * generic. It also demonstrates coming-soon, empty, and error widget
- * states so future modules have a reference implementation.
+ * The Platform dashboard is the operational command center — it answers
+ * "what requires attention right now?", not "what products exist".
+ *
+ * The operational Operations/System/Quality metrics come from modules and
+ * services that are not built yet, so those widgets render honest
+ * empty states that explain when data will connect — no invented numbers.
+ * The Activity section reuses the BO-01.03C ActivityCenter with real
+ * audit-log entries the host page fetches server-side.
  */
 
 export const PLATFORM_DASHBOARD_ID = "platform";
 
 export type PlatformDashboardData = {
-  productsEnabled: number;
-  productsTotal: number;
-  userCount: number;
-  roleCount: number;
-  auditCount: number;
-  products: Array<{
-    key: string;
-    name: string;
-    description: string | null;
-    licenseStatus: string;
-  }>;
   /** Mapped from audit logs server-side; rendered via ActivityCenter. */
   activity: ActivityEntry[];
   loadedAt: string;
@@ -45,14 +34,36 @@ export type PlatformDashboardData = {
 
 const C = CORE_WIDGET_CATEGORIES;
 
+/** Builds an operational metric widget that has no data source yet. */
+function pending(
+  id: string,
+  title: string,
+  categoryId: string,
+  icon: WidgetIconComponent,
+  emptyMessage: string,
+  order: number
+): DashboardWidget {
+  return {
+    id,
+    categoryId,
+    title,
+    icon,
+    size: "small",
+    status: "active",
+    state: "empty",
+    emptyMessage,
+    order,
+  };
+}
+
 dashboardRegistry.registerDashboardProvider({
-  id: "platform",
+  id: "platform:dashboard",
   label: "Platform",
   getDashboards: () => [
     {
       id: PLATFORM_DASHBOARD_ID,
-      title: "Company overview",
-      description: "Platform metrics and activity for your company.",
+      title: "Platform",
+      description: "Operational command center for your company.",
     },
   ],
 });
@@ -60,159 +71,135 @@ dashboardRegistry.registerDashboardProvider({
 dashboardRegistry.registerWidgetProvider({
   id: "platform",
   label: "Platform",
-  categories: [C.OVERVIEW, C.PRODUCTS, C.SYSTEM, C.ACTIVITY, C.QUALITY],
+  categories: [C.OPERATIONS, C.SYSTEM, C.QUALITY, C.ACTIVITY],
   getWidgets({ dashboardId, data }) {
     if (dashboardId !== PLATFORM_DASHBOARD_ID) return [];
     const stats = data?.platform as PlatformDashboardData | undefined;
-    if (!stats) return [];
+    const activity = stats?.activity ?? [];
 
-    const widgets: DashboardWidget[] = [
-      {
-        id: "products-enabled",
-        categoryId: C.OVERVIEW.id,
-        title: "Products enabled",
-        icon: BoxesIcon,
-        size: "small",
-        status: "active",
-        order: 0,
-        metric: {
-          value: stats.productsEnabled,
-          trend: {
-            direction: stats.productsEnabled === stats.productsTotal ? "up" : "flat",
-            label: `of ${stats.productsTotal} available`,
-          },
-        },
-        href: "/products",
-        timestamp: stats.loadedAt,
-      },
-      {
-        id: "users",
-        categoryId: C.OVERVIEW.id,
-        title: "Users",
-        icon: UsersIcon,
-        size: "small",
-        status: "active",
-        order: 1,
-        metric: { value: stats.userCount, helper: "in your company" },
-        href: "/users",
-        timestamp: stats.loadedAt,
-      },
-      {
-        id: "roles",
-        categoryId: C.OVERVIEW.id,
-        title: "Roles",
-        icon: ShieldIcon,
-        size: "small",
-        status: "active",
-        order: 2,
-        metric: { value: stats.roleCount, helper: "system & custom" },
-        href: "/roles",
-        timestamp: stats.loadedAt,
-      },
-      {
-        id: "audit-activity",
-        categoryId: C.OVERVIEW.id,
-        title: "Audit activity",
-        icon: ScrollIcon,
-        size: "small",
-        status: "active",
-        order: 3,
-        metric: { value: stats.auditCount, helper: "recorded actions" },
-        href: "/audit-logs",
-        timestamp: stats.loadedAt,
-      },
-      {
-        id: "your-products",
-        categoryId: C.PRODUCTS.id,
-        title: "Your products",
-        subtitle: "Licensed to your company",
-        icon: BoxesIcon,
-        size: "large",
-        status: "active",
-        order: 0,
-        href: "/switcher",
-        render: () => (
-          <ul className="space-y-2.5">
-            {stats.products.map((p) => (
-              <li key={p.key} className="flex items-center gap-3">
-                <ProductGlyph name={p.name} productKey={p.key} size="sm" />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">{p.name}</p>
-                  <p className="truncate text-caption">{p.description}</p>
-                </div>
-                <StatusBadge status={p.licenseStatus} />
-              </li>
-            ))}
-          </ul>
-        ),
-        footer: "Manage licenses on the Products page.",
-      },
-      {
-        id: "performance-trends",
-        categoryId: C.QUALITY.id,
-        title: "Performance trends",
-        description: "KPI charts arrive with the product module build orders.",
-        icon: SparkleIcon,
-        size: "medium",
-        status: "coming_soon",
-        accentKey: "COMMAND_CENTER",
-        order: 0,
-      },
-      {
-        id: "system-status",
-        categoryId: C.SYSTEM.id,
-        title: "System status",
-        subtitle: "Incidents & service health",
-        icon: SettingsIcon,
-        size: "medium",
-        status: "active",
-        state: "empty",
-        emptyMessage: "No incidents reported.",
-        footer: "Service monitoring ships with the operations modules.",
-        order: 0,
-        timestamp: stats.loadedAt,
-      },
-      {
-        id: "connected-services",
-        categoryId: C.SYSTEM.id,
-        title: "Connected services",
-        subtitle: "Integration health",
-        icon: SearchIcon,
-        size: "medium",
-        status: "active",
-        state: "error",
-        errorMessage:
-          "No integrations are connected yet — this widget demonstrates the error state.",
-        footer: "Integrations ship in a later phase.",
-        order: 1,
-        actions: [
-          {
-            id: "retry",
-            label: "Retry",
-            perform: (ctx) => ctx.refresh(),
-          },
-        ],
-      },
+    return [
+      // Operations — "what's happening in the field right now".
+      pending(
+        "active-jobs",
+        "Active jobs",
+        C.OPERATIONS.id,
+        BoxesIcon,
+        "Live job data connects with the Locate and Dispatch modules.",
+        0
+      ),
+      pending(
+        "active-users",
+        "Active users",
+        C.OPERATIONS.id,
+        UsersIcon,
+        "Live session tracking begins with the operations modules.",
+        1
+      ),
+      pending(
+        "todays-work",
+        "Today's work",
+        C.OPERATIONS.id,
+        ScrollIcon,
+        "Scheduled work appears once Dispatch is online.",
+        2
+      ),
+      pending(
+        "open-alerts",
+        "Open alerts",
+        C.OPERATIONS.id,
+        BellIcon,
+        "No alert sources are connected yet.",
+        3
+      ),
+
+      // System — platform service health.
+      pending(
+        "api-health",
+        "API health",
+        C.SYSTEM.id,
+        SettingsIcon,
+        "Service telemetry connects with platform monitoring.",
+        0
+      ),
+      pending(
+        "queue-status",
+        "Queue status",
+        C.SYSTEM.id,
+        BoxesIcon,
+        "Background queue metrics are not reporting yet.",
+        1
+      ),
+      pending(
+        "notification-services",
+        "Notification services",
+        C.SYSTEM.id,
+        BellIcon,
+        "Delivery channels (email, SMS) are configured in a later phase.",
+        2
+      ),
+      pending(
+        "background-jobs",
+        "Background jobs",
+        C.SYSTEM.id,
+        SearchIcon,
+        "Job-runner metrics connect with platform monitoring.",
+        3
+      ),
+
+      // Quality — processing integrity.
+      pending(
+        "failed-jobs",
+        "Failed jobs",
+        C.QUALITY.id,
+        ShieldIcon,
+        "Job outcomes report once background processing is online.",
+        0
+      ),
+      pending(
+        "validation-errors",
+        "Validation errors",
+        C.QUALITY.id,
+        ShieldIcon,
+        "Validation telemetry connects with the operations modules.",
+        1
+      ),
+      pending(
+        "sync-issues",
+        "Sync issues",
+        C.QUALITY.id,
+        SearchIcon,
+        "Integration sync health connects in a later phase.",
+        2
+      ),
+      pending(
+        "processing-errors",
+        "Processing errors",
+        C.QUALITY.id,
+        ScrollIcon,
+        "Error tracking connects with platform monitoring.",
+        3
+      ),
+
+      // Activity — reuses the ActivityCenter with real audit data.
       {
         id: "recent-activity",
         categoryId: C.ACTIVITY.id,
         title: "Recent activity",
-        subtitle: "Latest admin actions",
+        subtitle: "Audit events across your company",
         icon: ScrollIcon,
         size: "wide",
         status: "active",
         order: 0,
         href: "/audit-logs",
-        timestamp: stats.loadedAt,
+        timestamp: stats?.loadedAt,
         render: () => (
           <ActivityCenter
-            entries={stats.activity}
+            entries={activity}
             emptyTitle="No activity yet"
-            emptyDescription="Admin actions will appear here as they happen."
+            emptyDescription="Admin actions and audit events will appear here."
           />
         ),
       },
     ];
-    return widgets;
   },
 });
