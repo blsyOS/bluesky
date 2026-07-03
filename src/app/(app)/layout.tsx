@@ -1,8 +1,8 @@
 import { cookies } from "next/headers";
 import { AppShell } from "@/components/shell/app-shell";
-import { getProductAccess } from "@/lib/access";
 import { getCurrentSession } from "@/lib/session";
 import { initials } from "@/lib/format";
+import { DEFAULT_PRODUCT_ID, PRODUCT_COOKIE } from "@/lib/products";
 
 // Admin pages always reflect live tenant data — never prerender at build time.
 export const dynamic = "force-dynamic";
@@ -12,9 +12,8 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [session, products, cookieStore] = await Promise.all([
+  const [session, cookieStore] = await Promise.all([
     getCurrentSession(),
-    getProductAccess(),
     cookies(),
   ]);
 
@@ -36,8 +35,10 @@ export default async function AppLayout({
         role,
         companyName: session.company.name,
       }}
-      products={products}
       initialCollapsed={cookieStore.get("bsky_sidebar")?.value === "collapsed"}
+      initialProductId={
+        cookieStore.get(PRODUCT_COOKIE)?.value ?? DEFAULT_PRODUCT_ID
+      }
     >
       {children}
     </AppShell>

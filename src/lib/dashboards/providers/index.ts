@@ -14,13 +14,12 @@ import { dashboardRegistry } from "../registry";
 
 /**
  * Dashboards named in the catalog that don't have a dedicated provider yet
- * (Fleet, Customers, Reports, and the role dashboards). Registering their
+ * (Fleet, Reports, and the role dashboards). Registering their
  * layouts lets role routing target them; with no widget provider they
  * render the engine's built-in empty state until their build orders land.
  */
 const SCAFFOLD_ONLY: DashboardId[] = [
   "fleet",
-  "customers",
   "reports",
   "executive",
   "manager",

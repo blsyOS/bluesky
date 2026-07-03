@@ -33,8 +33,53 @@ model Company {
   roles     Role[]
   auditLogs AuditLog[]
   settings  CompanySettings?
+  contacts  Contact[]
 
   @@map("companies")
+}
+
+// Operational contact directory used by BlueSky Locate (not a general CRM).
+// Contact type/subtype are typed string constants (see src/lib/contacts.ts).
+// Address and list fields are stored flattened / as JSON strings for SQLite;
+// document/agreement attachments are future-ready and not modeled yet.
+model Contact {
+  id            String   @id @default(cuid())
+  companyId     String
+  contactType   String // group id, e.g. utility_owner, municipality
+  subtype       String? // specific, e.g. gas, city, excavator
+  status        String   @default("active") // active | inactive
+
+  // General
+  organization  String? // company / organization name
+  contactName   String
+  title         String?
+  department    String?
+
+  // Communication
+  officePhone   String?
+  mobilePhone   String?
+  email         String?
+  fax           String?
+
+  // Addresses
+  billingAddress  String?
+  mailingAddress  String?
+  physicalAddress String?
+
+  // Operational
+  utilityServed String?
+  serviceArea   String?
+  counties      String? // JSON string array
+  states        String? // JSON string array
+  notes         String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, contactType])
+  @@map("contacts")
 }
 
 model Product {

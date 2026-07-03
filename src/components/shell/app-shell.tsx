@@ -3,24 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import type { ProductAccess } from "@/lib/access";
 import {
-  BoxesIcon,
   BuildingIcon,
-  ChartBarIcon,
   ChevronDownIcon,
-  ContactIcon,
-  DashboardIcon,
-  DropletIcon,
-  MapPinIcon,
   MenuIcon,
-  RouteIcon,
-  ScrollIcon,
-  SettingsIcon,
-  ShieldIcon,
-  StormIcon,
-  TruckIcon,
-  UsersIcon,
   XIcon,
 } from "@/components/icons";
 import { Logo, LogoMark } from "@/components/logo";
@@ -28,52 +14,17 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { AutoBreadcrumbs } from "@/components/shell/breadcrumbs";
 import { SearchLauncher } from "@/components/search/search-launcher";
 import { NotificationLauncher } from "@/components/notifications/notification-launcher";
-import { ProductSwitcher } from "@/components/shell/product-switcher";
+import { ProductContextSelector } from "@/components/shell/product-context-selector";
 import { UserMenu, type MenuUser } from "@/components/shell/user-menu";
+import {
+  ADMIN_SECTION,
+  DEFAULT_PRODUCT_ID,
+  productRegistry,
+  resolveSidebar,
+} from "@/lib/products";
+import { setPreferenceCookie } from "@/lib/cookies";
 import { accentStyle } from "@/lib/accents";
 import { cn } from "@/lib/cn";
-
-type NavItem = {
-  href: string;
-  label: string;
-  icon: typeof DashboardIcon;
-  /** Active only on an exact path match (used for the /dashboard root). */
-  exact?: boolean;
-};
-
-// The sidebar is the primary way to reach modules; the dashboard is the
-// operational command center, not a navigation page. Module entries route
-// to their (scaffolded) dashboards under /dashboard/<id>.
-const NAV_SECTIONS: Array<{ label: string; items: NavItem[] }> = [
-  {
-    label: "Workspace",
-    items: [
-      { href: "/dashboard", label: "Dashboard", icon: DashboardIcon, exact: true },
-    ],
-  },
-  {
-    label: "Modules",
-    items: [
-      { href: "/dashboard/locate", label: "Locate", icon: MapPinIcon },
-      { href: "/dashboard/storm", label: "Storm", icon: StormIcon },
-      { href: "/dashboard/leak", label: "Leak", icon: DropletIcon },
-      { href: "/dashboard/dispatch", label: "Dispatch", icon: RouteIcon },
-      { href: "/dashboard/fleet", label: "Fleet", icon: TruckIcon },
-      { href: "/dashboard/customers", label: "Customers", icon: ContactIcon },
-      { href: "/dashboard/reports", label: "Reports", icon: ChartBarIcon },
-    ],
-  },
-  {
-    label: "Administration",
-    items: [
-      { href: "/products", label: "Products", icon: BoxesIcon },
-      { href: "/users", label: "Users", icon: UsersIcon },
-      { href: "/roles", label: "Roles & Permissions", icon: ShieldIcon },
-      { href: "/audit-logs", label: "Audit Logs", icon: ScrollIcon },
-      { href: "/settings", label: "Settings", icon: SettingsIcon },
-    ],
-  },
-];
 
 export type ShellCompany = {
   name: string;
@@ -85,41 +36,44 @@ const SIDEBAR_COOKIE = "bsky_sidebar";
 export function AppShell({
   company,
   user,
-  products,
   initialCollapsed = false,
+  initialProductId = DEFAULT_PRODUCT_ID,
   children,
 }: {
   company: ShellCompany;
   user: MenuUser;
-  products: ProductAccess[];
   /** Server-read cookie value, so SSR renders the persisted state without a flash. */
   initialCollapsed?: boolean;
+  /** Server-read active product cookie, so SSR renders the right sidebar. */
+  initialProductId?: string;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(initialCollapsed);
+  const [activeProductId, setActiveProductId] = useState(initialProductId);
 
   function toggleCollapsed() {
     const next = !collapsed;
     setCollapsed(next);
-    document.cookie = `${SIDEBAR_COOKIE}=${next ? "collapsed" : "expanded"}; path=/; max-age=31536000; samesite=lax`;
+    setPreferenceCookie(SIDEBAR_COOKIE, next ? "collapsed" : "expanded");
   }
 
-  // Inside a product workspace the shell subtly adopts that product's
-  // accent (active nav bar, highlights). Everywhere else it stays on the
-  // neutral brand color.
-  const activeProduct = pathname.startsWith("/launch/")
-    ? products.find(
-        (p) => p.product.key.toLowerCase() === pathname.split("/")[2]
-      )
-    : undefined;
-  const shellStyle = activeProduct
-    ? accentStyle(activeProduct.product.key)
+  // The sidebar is generated entirely from the active product's config —
+  // no hardcoded module nav. Administration is appended globally.
+  const activeProductConfig =
+    productRegistry.get(activeProductId) ??
+    productRegistry.get(DEFAULT_PRODUCT_ID)!;
+  const navSections = resolveSidebar(activeProductConfig, ADMIN_SECTION);
+
+  // The shell subtly adopts the active product's accent (active nav bar,
+  // highlights); the platform context stays on the neutral brand color.
+  const shellStyle = activeProductConfig.accentKey
+    ? accentStyle(activeProductConfig.accentKey)
     : undefined;
 
   const productNames = Object.fromEntries(
-    products.map((p) => [p.product.key.toLowerCase(), p.product.name])
+    productRegistry.list().map((p) => [p.id, p.name])
   );
 
   // `inDrawer` renders the always-expanded variant used by the mobile drawer.
@@ -179,7 +133,7 @@ export function AppShell({
             slim ? "px-2" : "px-3"
           )}
         >
-          {NAV_SECTIONS.map((section) => (
+          {navSections.map((section) => (
             <div key={section.label} className="mt-4 first:mt-1">
               {slim ? (
                 <div
@@ -199,7 +153,7 @@ export function AppShell({
                       pathname.startsWith(`${item.href}/`);
                   return (
                     <Link
-                      key={item.href}
+                      key={`${item.href}-${item.label}`}
                       href={item.href}
                       onClick={() => setDrawerOpen(false)}
                       aria-current={active ? "page" : undefined}
@@ -341,8 +295,8 @@ export function AppShell({
       </div>
 
       <div className="flex min-h-dvh flex-col">
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b border-border bg-surface/90 px-3 backdrop-blur sm:px-6">
-          {/* Left: mobile menu + breadcrumbs */}
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-1 border-b border-border bg-surface/90 px-3 backdrop-blur sm:gap-2 sm:px-6">
+          {/* Left: mobile menu + product context + breadcrumbs */}
           <button
             type="button"
             onClick={() => setDrawerOpen(true)}
@@ -351,7 +305,15 @@ export function AppShell({
           >
             <MenuIcon className="size-5" />
           </button>
-          <AutoBreadcrumbs productNames={productNames} className="min-w-0" />
+          <ProductContextSelector
+            activeProductId={activeProductId}
+            onProductChange={setActiveProductId}
+          />
+          <span aria-hidden className="hidden h-5 w-px bg-border lg:block" />
+          <AutoBreadcrumbs
+            productNames={productNames}
+            className="hidden min-w-0 lg:block"
+          />
 
           {/* Center: global search / command palette */}
           <div
@@ -361,9 +323,8 @@ export function AppShell({
             <SearchLauncher />
           </div>
 
-          {/* Right: product switcher, notifications, theme, profile. */}
+          {/* Right: notifications, theme, profile. */}
           <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
-            <ProductSwitcher products={products} />
             <NotificationLauncher />
             <ThemeToggle />
             <UserMenu user={user} />

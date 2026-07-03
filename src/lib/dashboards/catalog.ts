@@ -57,12 +57,6 @@ export const DASHBOARDS = {
     description: "Vehicle and equipment operations.",
     kind: "module",
   },
-  customers: {
-    id: "customers",
-    title: "Customers",
-    description: "Customer accounts and relationships.",
-    kind: "module",
-  },
   reports: {
     id: "reports",
     title: "Reports",
@@ -116,6 +110,5 @@ export const MODULE_NAV_IDS = [
   "leak",
   "dispatch",
   "fleet",
-  "customers",
   "reports",
 ] as const satisfies readonly DashboardId[];

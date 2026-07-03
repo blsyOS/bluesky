@@ -23,7 +23,6 @@ test("catalog registers every required dashboard id", () => {
     "leak",
     "dispatch",
     "fleet",
-    "customers",
     "reports",
     "executive",
     "manager",

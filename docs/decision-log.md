@@ -134,6 +134,29 @@ Append-only record of platform-level decisions. Newest entries last.
   Hide action (and their context methods) introduced for framework testing;
   kept View Details, Refresh, and Retry.
 
+## BO-01.03F — BlueSky Locate Foundation & Product Navigation
+
+- **Product navigation is config-driven** (`src/lib/products`): each product
+  declares a `ProductNavConfig` and registers it; `resolveSidebar` builds the
+  sidebar from the active product's sections plus a globally-appended
+  Administration section. No hardcoded module nav; new products don't touch
+  shared sidebar code.
+- **Active product persists in a cookie** (`bsky_product`) read server-side
+  in the layout, so SSR renders the correct product sidebar with no flash;
+  the client `ProductContextSelector` switches context and navigates to the
+  product's default landing. Configs are a client registry (icons are
+  components); only the product id crosses the RSC boundary.
+- **Feature flags gate optional modules** per product — Contacts is exclusive
+  to BlueSky Locate via the `contacts` flag, so it never appears elsewhere.
+- **Contacts is an operational directory, not a CRM**: a `Contact` model plus
+  a typed taxonomy (`src/lib/contacts.ts`) of seven groups with subtypes;
+  the UI reuses the shared table/form/card components and seeds no data.
+- **Cookie writes centralized** in `src/lib/cookies.ts` (`setPreferenceCookie`)
+  so the React immutability lint rule is satisfied and the persistence policy
+  lives in one place (also adopted by the sidebar-collapse preference).
+- **"Customers" removed** from the dashboard catalog — Contacts is a module
+  page, not a scaffold dashboard.
+
 ## Visual refresh (post BO-01.03B)
 
 - **Light navigation shell**: the sidebar is light in light mode (white
