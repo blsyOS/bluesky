@@ -90,6 +90,27 @@ Append-only record of platform-level decisions. Newest entries last.
   mount-state juggling, keeping the lazy-mounted drawer free of
   setState-in-effect patterns.
 
+## BO-01.03D — Dashboard Framework
+
+- **Third application of the registry pattern** (`dashboardRegistry`):
+  dashboard providers and widget providers register via side-effect
+  imports; `loadSections()` fans out with `Promise.allSettled`, drops
+  `disabled` widgets, and orders by category then widget order.
+- **Server data crosses into the engine through an open
+  `DashboardContext.data` bag**: host pages fetch what their widgets need
+  server-side; each provider owns the shape of the keys it reads (the
+  platform provider exports `PlatformDashboardData`). The engine never
+  learns module data shapes.
+- **Widget sizes map to grid footprints** (small/medium/large/wide over a
+  1/2/4-column responsive grid) rather than free-form layout — drag-and-
+  drop and persistence are explicitly deferred.
+- **The platform dashboard's activity widget reuses `ActivityCenter`**
+  from BO-01.03C with audit-log entries mapped server-side; no second
+  feed component exists.
+- **Standard widget actions live in the card** (View Details / Refresh /
+  Configure / Hide), with widget-defined actions prepended — modules add
+  actions without touching the engine.
+
 ## Visual refresh (post BO-01.03B)
 
 - **Light navigation shell**: the sidebar is light in light mode (white

@@ -4,7 +4,8 @@ import { cn } from "@/lib/cn";
 
 type Trend = { direction: "up" | "down" | "flat"; label: string };
 
-function TrendIndicator({ trend }: { trend: Trend }) {
+/** Exported for reuse by dashboard widget cards. */
+export function TrendIndicator({ trend }: { trend: Trend }) {
   const arrow =
     trend.direction === "up" ? "↑" : trend.direction === "down" ? "↓" : "→";
   return (
