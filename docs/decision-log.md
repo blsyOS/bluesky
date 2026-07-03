@@ -69,6 +69,27 @@ Append-only record of platform-level decisions. Newest entries last.
   intentionally non-persistent in-memory implementation; persistence is
   deferred to authenticated user preferences.
 
+## BO-01.03C — Notification Framework & Activity Center
+
+- **Same registry pattern as search**: a `notificationRegistry` singleton
+  that modules register notification providers, activity providers, and
+  categories into via side-effect imports; fan-out uses
+  `Promise.allSettled` so a failing provider can't break the center.
+- **Priorities are a fixed five-level scale** (critical/high/normal/low/
+  information) with display metadata centralized in `PRIORITY_META`;
+  categories are open-ended like search categories.
+- **Center state is deliberately session-only**: `useNotificationCenter`
+  owns read/pin/archive mutations in React state at the launcher level so
+  the bell badge stays live; a persistence-backed store replaces the hook
+  internals when authenticated preferences land.
+- **Shared modal plumbing extracted**: `lib/focus-trap.ts` and
+  `lib/use-modal-guards.ts` now back both the command palette and the
+  notification drawer (the palette was refactored onto them — behavior
+  identical, logic single-sourced).
+- **Drawer animation via CSS keyframes** (`--animate-drawer-in`), not
+  mount-state juggling, keeping the lazy-mounted drawer free of
+  setState-in-effect patterns.
+
 ## Visual refresh (post BO-01.03B)
 
 - **Light navigation shell**: the sidebar is light in light mode (white

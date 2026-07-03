@@ -20,6 +20,7 @@ import { Logo, LogoMark } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { AutoBreadcrumbs } from "@/components/shell/breadcrumbs";
 import { SearchLauncher } from "@/components/search/search-launcher";
+import { NotificationLauncher } from "@/components/notifications/notification-launcher";
 import { ProductSwitcher } from "@/components/shell/product-switcher";
 import { UserMenu, type MenuUser } from "@/components/shell/user-menu";
 import { accentStyle } from "@/lib/accents";
@@ -329,10 +330,10 @@ export function AppShell({
             <SearchLauncher />
           </div>
 
-          {/* Right: product switcher, theme, profile.
-              A notifications button will slot in before the theme toggle. */}
+          {/* Right: product switcher, notifications, theme, profile. */}
           <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
             <ProductSwitcher products={products} />
+            <NotificationLauncher />
             <ThemeToggle />
             <UserMenu user={user} />
           </div>

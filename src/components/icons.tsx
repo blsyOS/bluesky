@@ -162,6 +162,43 @@ export function SparkleIcon(props: IconProps) {
   );
 }
 
+export function BellIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M18 10a6 6 0 10-12 0c0 4-1.5 5.5-2.5 6.5h17C19.5 15.5 18 14 18 10z" />
+      <path d="M10 20a2.2 2.2 0 004 0" />
+    </Icon>
+  );
+}
+
+export function PinIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M9 4h6l-.7 6.3 2.7 2.7v1.5H7V13l2.7-2.7L9 4z" />
+      <path d="M12 14.5V21" />
+    </Icon>
+  );
+}
+
+export function ArchiveIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <rect x="3.5" y="4" width="17" height="4.5" rx="1" />
+      <path d="M5.5 8.5V19a1 1 0 001 1h11a1 1 0 001-1V8.5M10 12.5h4" />
+    </Icon>
+  );
+}
+
+export function InboxIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M4 5h16v14H4z" opacity="0" />
+      <path d="M20 13h-4.5l-1.5 2.5h-4L8.5 13H4" />
+      <path d="M6.2 5.5h11.6a1 1 0 01.9.6l2.3 7v5a1.5 1.5 0 01-1.5 1.5h-15A1.5 1.5 0 013 18.1v-5l2.3-7a1 1 0 01.9-.6z" />
+    </Icon>
+  );
+}
+
 export function BuildingIcon(props: IconProps) {
   return (
     <Icon {...props}>

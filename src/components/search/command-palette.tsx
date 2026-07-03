@@ -14,6 +14,8 @@ import {
   NoResultsState,
   SearchingState,
 } from "@/components/search/search-states";
+import { trapTabKey } from "@/lib/focus-trap";
+import { useModalGuards } from "@/lib/use-modal-guards";
 import { searchRegistry } from "@/lib/search/registry";
 import { recentSearches } from "@/lib/search/recent";
 import { SUGGESTED_PAGES } from "@/lib/search/providers/platform";
@@ -95,32 +97,9 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
     };
   }, [query]);
 
-  // Lock body scroll while the palette is open.
-  useEffect(() => {
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = previous;
-    };
-  }, []);
-
-  // Document-level guards: Escape always closes, and if focus ever escapes
-  // the dialog (e.g. the focused element was removed), Tab re-enters it.
-  useEffect(() => {
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        onClose();
-        return;
-      }
-      if (e.key === "Tab" && !dialogRef.current?.contains(document.activeElement)) {
-        e.preventDefault();
-        inputRef.current?.focus();
-      }
-    }
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [onClose]);
+  // Scroll lock + document-level Escape + focus recovery (shared with the
+  // notification drawer).
+  useModalGuards({ onClose, containerRef: dialogRef, initialFocusRef: inputRef });
 
   const sections = useMemo<PaletteSection[]>(() => {
     if (status === "searching") return [];
@@ -257,23 +236,8 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
   // Focus trap: Tab cycles the dialog's focusable controls.
   // (Escape is handled at the document level so it works from any focus state.)
   function onDialogKeyDown(e: React.KeyboardEvent) {
-    if (e.key !== "Tab") return;
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-    const focusables = [
-      ...dialog.querySelectorAll<HTMLElement>(
-        "input, button, a[href], [tabindex]:not([tabindex='-1'])"
-      ),
-    ].filter((el) => !el.hasAttribute("disabled"));
-    if (focusables.length === 0) return;
-    const first = focusables[0];
-    const last = focusables[focusables.length - 1];
-    if (e.shiftKey && document.activeElement === first) {
-      e.preventDefault();
-      last.focus();
-    } else if (!e.shiftKey && document.activeElement === last) {
-      e.preventDefault();
-      first.focus();
+    if (e.key === "Tab" && dialogRef.current) {
+      trapTabKey(dialogRef.current, e);
     }
   }
 
