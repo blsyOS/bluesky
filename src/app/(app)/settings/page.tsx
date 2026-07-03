@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/form";
 import { SettingsPanel } from "@/components/ui/settings-panel";
 import { ToastForm } from "@/components/ui/toast-form";
+import { ProductContextPanel } from "./product-context-panel";
 import { updateCompany, updateCompanySettings } from "@/lib/actions/companies";
 import { getCurrentSession } from "@/lib/session";
 import { COMPANY_STATUSES, THEMES } from "@/lib/constants";
@@ -32,6 +33,10 @@ export default async function SettingsPage() {
         title="Company settings"
         description="Your company profile and workspace preferences."
       />
+
+      <div className="mb-6">
+        <ProductContextPanel />
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <SettingsPanel

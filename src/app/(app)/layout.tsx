@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { AppShell } from "@/components/shell/app-shell";
+import { ProductContextProvider } from "@/components/shell/product-context";
 import { getCurrentSession } from "@/lib/session";
 import { initials } from "@/lib/format";
 import { DEFAULT_PRODUCT_ID, PRODUCT_COOKIE } from "@/lib/products";
@@ -23,24 +24,27 @@ export default async function AppLayout({
   const role = roleNames[0] ?? "Member";
 
   return (
-    <AppShell
-      company={{
-        name: session.company.name,
-        subdomain: session.company.subdomain,
-      }}
-      user={{
-        name: `${session.user.firstName} ${session.user.lastName}`,
-        email: session.user.email,
-        initials: initials(session.user.firstName, session.user.lastName),
-        role,
-        companyName: session.company.name,
-      }}
-      initialCollapsed={cookieStore.get("bsky_sidebar")?.value === "collapsed"}
+    <ProductContextProvider
       initialProductId={
         cookieStore.get(PRODUCT_COOKIE)?.value ?? DEFAULT_PRODUCT_ID
       }
     >
-      {children}
-    </AppShell>
+      <AppShell
+        company={{
+          name: session.company.name,
+          subdomain: session.company.subdomain,
+        }}
+        user={{
+          name: `${session.user.firstName} ${session.user.lastName}`,
+          email: session.user.email,
+          initials: initials(session.user.firstName, session.user.lastName),
+          role,
+          companyName: session.company.name,
+        }}
+        initialCollapsed={cookieStore.get("bsky_sidebar")?.value === "collapsed"}
+      >
+        {children}
+      </AppShell>
+    </ProductContextProvider>
   );
 }

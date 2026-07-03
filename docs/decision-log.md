@@ -157,6 +157,17 @@ Append-only record of platform-level decisions. Newest entries last.
 - **"Customers" removed** from the dashboard catalog — Contacts is a module
   page, not a scaffold dashboard.
 
+## BO-01.03F.1 — Product Context Selector Cleanup
+
+- **Product switching is an administrative action, not navigation**: the
+  topbar selector was removed; switching lives only in Administration →
+  Settings → Product Context. The sidebar shows the active product as
+  read-only context.
+- **Active-product state lifted into `ProductContextProvider`** (wrapping
+  the shell in the app layout), so the Settings dropdown and the shell
+  share one source of truth; cookie persistence and default-landing
+  navigation live in the provider's `switchProduct`.
+
 ## Visual refresh (post BO-01.03B)
 
 - **Light navigation shell**: the sidebar is light in light mode (white

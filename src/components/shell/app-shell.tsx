@@ -14,7 +14,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { AutoBreadcrumbs } from "@/components/shell/breadcrumbs";
 import { SearchLauncher } from "@/components/search/search-launcher";
 import { NotificationLauncher } from "@/components/notifications/notification-launcher";
-import { ProductContextSelector } from "@/components/shell/product-context-selector";
+import { useProductContext } from "@/components/shell/product-context";
 import { UserMenu, type MenuUser } from "@/components/shell/user-menu";
 import {
   ADMIN_SECTION,
@@ -37,21 +37,20 @@ export function AppShell({
   company,
   user,
   initialCollapsed = false,
-  initialProductId = DEFAULT_PRODUCT_ID,
   children,
 }: {
   company: ShellCompany;
   user: MenuUser;
   /** Server-read cookie value, so SSR renders the persisted state without a flash. */
   initialCollapsed?: boolean;
-  /** Server-read active product cookie, so SSR renders the right sidebar. */
-  initialProductId?: string;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(initialCollapsed);
-  const [activeProductId, setActiveProductId] = useState(initialProductId);
+  // Product switching lives in Settings → Product Context; the shell only
+  // reads the active product to build its sidebar.
+  const { activeProductId } = useProductContext();
 
   function toggleCollapsed() {
     const next = !collapsed;
@@ -121,6 +120,33 @@ export function AppShell({
               </p>
               <p className="truncate text-xs text-sidebar-muted">
                 {company.subdomain}.blueskyos.app
+              </p>
+            </div>
+          ) : null}
+        </div>
+
+        {/* Read-only active product context. Switching happens under
+            Administration → Settings → Product Context. */}
+        <div
+          className={cn(
+            "mt-2 flex items-center gap-2.5",
+            slim ? "mx-2 justify-center px-2 py-1" : "mx-4 px-3 py-1"
+          )}
+          title={`Active product: ${activeProductConfig.name}`}
+        >
+          <span
+            aria-hidden
+            className="inline-flex size-6 shrink-0 items-center justify-center rounded-md bg-accent text-white"
+          >
+            <activeProductConfig.icon className="size-3.5" />
+          </span>
+          {!slim ? (
+            <div className="min-w-0">
+              <p className="truncate text-xs font-medium text-foreground">
+                {activeProductConfig.name}
+              </p>
+              <p className="text-[10px] uppercase tracking-widest text-sidebar-muted">
+                Active product
               </p>
             </div>
           ) : null}
@@ -296,7 +322,7 @@ export function AppShell({
 
       <div className="flex min-h-dvh flex-col">
         <header className="sticky top-0 z-30 flex h-16 items-center gap-1 border-b border-border bg-surface/90 px-3 backdrop-blur sm:gap-2 sm:px-6">
-          {/* Left: mobile menu + product context + breadcrumbs */}
+          {/* Left: mobile menu + breadcrumbs */}
           <button
             type="button"
             onClick={() => setDrawerOpen(true)}
@@ -305,15 +331,7 @@ export function AppShell({
           >
             <MenuIcon className="size-5" />
           </button>
-          <ProductContextSelector
-            activeProductId={activeProductId}
-            onProductChange={setActiveProductId}
-          />
-          <span aria-hidden className="hidden h-5 w-px bg-border lg:block" />
-          <AutoBreadcrumbs
-            productNames={productNames}
-            className="hidden min-w-0 lg:block"
-          />
+          <AutoBreadcrumbs productNames={productNames} className="min-w-0" />
 
           {/* Center: global search / command palette */}
           <div
