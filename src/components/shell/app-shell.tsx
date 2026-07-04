@@ -29,6 +29,8 @@ import { cn } from "@/lib/cn";
 export type ShellCompany = {
   name: string;
   subdomain: string;
+  /** Company branding: shown in the company card when set (BO-02.01A). */
+  logoUrl?: string | null;
 };
 
 const SIDEBAR_COOKIE = "bsky_sidebar";
@@ -112,7 +114,17 @@ export function AppShell({
           )}
           title={`${company.name} · ${company.subdomain}.blueskyos.app`}
         >
-          <BuildingIcon className="size-4.5 shrink-0 text-sidebar-muted" />
+          {company.logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- external, admin-provided logo URL
+            <img
+              src={company.logoUrl}
+              alt=""
+              aria-hidden
+              className="size-5 shrink-0 rounded object-contain"
+            />
+          ) : (
+            <BuildingIcon className="size-4.5 shrink-0 text-sidebar-muted" />
+          )}
           {!slim ? (
             <div className="min-w-0">
               <p className="truncate text-sm font-medium text-foreground">

@@ -12,7 +12,14 @@ export const PRODUCT_KEYS = [
 ] as const;
 export type ProductKey = (typeof PRODUCT_KEYS)[number];
 
-export const COMPANY_STATUSES = ["active", "inactive", "suspended"] as const;
+// Lifecycle statuses a company can be set to (BO-02.01A). "expired" exists
+// as a display status (see CompanyStatusBadge) but is derived, not settable.
+export const COMPANY_STATUSES = [
+  "trial",
+  "active",
+  "suspended",
+  "archived",
+] as const;
 export type CompanyStatus = (typeof COMPANY_STATUSES)[number];
 
 export const PRODUCT_STATUSES = ["active", "coming_soon", "hidden"] as const;

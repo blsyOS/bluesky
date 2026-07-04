@@ -5,19 +5,12 @@ import { db } from "@/lib/db";
 import { recordAudit } from "@/lib/audit";
 import { getCurrentSession } from "@/lib/session";
 import { CONTACT_STATUSES, isContactType } from "@/lib/contacts";
+import { csvToJsonList } from "@/lib/lists";
 
 export type CreateContactState = {
   ok?: boolean;
   error?: string;
 } | null;
-
-function csvToJson(value: string): string | null {
-  const items = value
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  return items.length ? JSON.stringify(items) : null;
-}
 
 /** Creates an operational directory contact. Real, user-entered data. */
 export async function createContact(
@@ -61,8 +54,8 @@ export async function createContact(
       physicalAddress: text("physicalAddress"),
       utilityServed: text("utilityServed"),
       serviceArea: text("serviceArea"),
-      counties: csvToJson(String(formData.get("counties") ?? "")),
-      states: csvToJson(String(formData.get("states") ?? "")),
+      counties: csvToJsonList(String(formData.get("counties") ?? "")),
+      states: csvToJsonList(String(formData.get("states") ?? "")),
       notes: text("notes"),
     },
   });

@@ -64,15 +64,22 @@ export function Switch({
         className
       )}
     >
-      <span className="relative inline-flex">
-        <input type="checkbox" role="switch" className="peer sr-only" {...props} />
-        <span
-          aria-hidden
-          className="h-5 w-9 rounded-full bg-border-strong transition-colors peer-checked:bg-primary peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary"
+      <span className="relative inline-flex h-5 w-9">
+        {/* The input itself is the (invisible) hit area covering the track,
+            so the whole switch is directly clickable/tappable. */}
+        <input
+          type="checkbox"
+          role="switch"
+          className="peer absolute inset-0 z-10 cursor-pointer opacity-0 disabled:cursor-not-allowed"
+          {...props}
         />
         <span
           aria-hidden
-          className="absolute left-0.5 top-0.5 size-4 rounded-full bg-white shadow-card transition-transform peer-checked:translate-x-4"
+          className="pointer-events-none absolute inset-0 rounded-full bg-border-strong transition-colors peer-checked:bg-primary peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary"
+        />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-0.5 top-0.5 size-4 rounded-full bg-white shadow-card transition-transform peer-checked:translate-x-4"
         />
       </span>
       {label}

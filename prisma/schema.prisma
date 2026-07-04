@@ -17,25 +17,117 @@ datasource db {
 }
 
 model Company {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   name         String
   legalName    String?
-  slug         String   @unique
-  subdomain    String   @unique
-  status       String   @default("active") // active | inactive | suspended
-  logoUrl      String?
-  primaryColor String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  dba          String? // "doing business as"
+  slug         String    @unique
+  subdomain    String    @unique
+  status       String    @default("active") // trial | active | suspended | archived
+  description  String?
+  foundedDate  DateTime?
+  website      String?
 
-  users     User[]
-  products  CompanyProduct[]
-  roles     Role[]
-  auditLogs AuditLog[]
-  settings  CompanySettings?
-  contacts  Contact[]
+  // Branding (favicon/email fields are future-ready placeholders)
+  logoUrl        String?
+  primaryColor   String?
+  secondaryColor String?
+  accentColor    String?
+  faviconUrl     String?
+  emailLogoUrl   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users            User[]
+  products         CompanyProduct[]
+  roles            Role[]
+  auditLogs        AuditLog[]
+  settings         CompanySettings?
+  contacts         Contact[]
+  contactInfo      CompanyContactInfo?
+  addresses        CompanyAddress[]
+  serviceTerritory CompanyServiceTerritory?
+  featureFlags     CompanyFeatureFlag[]
 
   @@map("companies")
+}
+
+// Company-level contact channels (1:1). Future-ready fields may exist here
+// unused; employee/user contact data lives elsewhere.
+model CompanyContactInfo {
+  id             String  @id @default(cuid())
+  companyId      String  @unique
+  mainPhone      String?
+  mainEmail      String?
+  emergencyPhone String?
+  afterHoursPhone String?
+  billingEmail   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("company_contact_info")
+}
+
+// One row per address type. Types are open strings driven by constants in
+// src/lib/company.ts (headquarters | mailing | billing today) so future
+// types are added without schema or UI-logic changes.
+model CompanyAddress {
+  id           String  @id @default(cuid())
+  companyId    String
+  type         String
+  companyLine  String? // company name as printed on the address
+  addressLine1 String?
+  addressLine2 String?
+  city         String?
+  state        String?
+  postalCode   String?
+  country      String? @default("USA")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, type])
+  @@map("company_addresses")
+}
+
+// Where the company operates (1:1). States/counties are JSON string arrays
+// for SQLite portability.
+model CompanyServiceTerritory {
+  id          String  @id @default(cuid())
+  companyId   String  @unique
+  states      String? // JSON string array
+  counties    String? // JSON string array
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("company_service_territories")
+}
+
+// Per-company feature flags. Keys are open strings; the known set lives in
+// src/lib/company.ts so modules can add flags without schema changes.
+model CompanyFeatureFlag {
+  id        String  @id @default(cuid())
+  companyId String
+  key       String
+  enabled   Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, key])
+  @@map("company_feature_flags")
 }
 
 // Operational contact directory used by BlueSky Locate (not a general CRM).

@@ -73,6 +73,7 @@ export function Breadcrumbs({
 /** Labels for platform routes; product routes resolve via productNames. */
 const ROUTE_LABELS: Record<string, string> = {
   dashboard: "Dashboard",
+  company: "Company",
   products: "Products",
   users: "Users",
   roles: "Roles & Permissions",
@@ -109,9 +110,13 @@ export function AutoBreadcrumbs({
       ROUTE_LABELS[segments[0]] ??
       segments[0].replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
     items.push({ label, href: `/${segments[0]}` });
-    // Deeper platform routes (future): /users/<id> etc.
+    // Deeper platform routes: title-case the segment (ids pass through).
     for (let i = 1; i < segments.length; i++) {
-      items.push({ label: segments[i] });
+      items.push({
+        label: segments[i]
+          .replace(/-/g, " ")
+          .replace(/\b\w/g, (c) => c.toUpperCase()),
+      });
     }
   }
 

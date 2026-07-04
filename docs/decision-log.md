@@ -168,6 +168,25 @@ Append-only record of platform-level decisions. Newest entries last.
   share one source of truth; cookie persistence and default-landing
   navigation live in the provider's `switchProduct`.
 
+## BO-02.01A — Company Profile Foundation
+
+- **Company data is normalized into focused satellites** rather than one
+  wide table: `CompanyContactInfo` (1:1), `CompanyAddress` (1:n keyed by an
+  open `type` string), `CompanyServiceTerritory` (1:1), and
+  `CompanyFeatureFlag` (1:n keyed by an open `key` string). Address types
+  and flag keys are constants in `src/lib/company.ts`, so future types/
+  flags are one-line additions with no schema or UI-logic changes.
+- **Company statuses became trial/active/suspended/archived** (settable)
+  plus a derived display-only "expired"; `CompanyStatusBadge` is the one
+  place statuses map to design-system tones.
+- **Company administration is its own area** (`/company`, first entry in
+  the global Administration nav) using the established secondary-tab
+  pattern; /settings slimmed to workspace-level concerns and links there.
+- **Branding integration starts small**: logo in the sidebar company card;
+  favicon/email fields persist as placeholders for later theming epics.
+- **List fields share one csv⇄JSON helper** (`src/lib/lists.ts`), adopted
+  by both Contacts and Service Territory.
+
 ## Visual refresh (post BO-01.03B)
 
 - **Light navigation shell**: the sidebar is light in light mode (white

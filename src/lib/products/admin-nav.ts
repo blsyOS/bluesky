@@ -1,5 +1,6 @@
 import {
   BoxesIcon,
+  BuildingIcon,
   ScrollIcon,
   SettingsIcon,
   ShieldIcon,
@@ -14,6 +15,7 @@ import type { NavSection } from "./types";
 export const ADMIN_SECTION: NavSection = {
   label: "Administration",
   items: [
+    { label: "Company", href: "/company", icon: BuildingIcon },
     { label: "Products", href: "/products", icon: BoxesIcon },
     { label: "Users", href: "/users", icon: UsersIcon },
     { label: "Roles & Permissions", href: "/roles", icon: ShieldIcon },

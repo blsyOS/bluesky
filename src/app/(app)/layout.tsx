@@ -33,6 +33,7 @@ export default async function AppLayout({
         company={{
           name: session.company.name,
           subdomain: session.company.subdomain,
+          logoUrl: session.company.logoUrl,
         }}
         user={{
           name: `${session.user.firstName} ${session.user.lastName}`,
