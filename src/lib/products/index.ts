@@ -9,6 +9,11 @@ import "./configs/storm";
 import "./configs/leak";
 
 export { productRegistry, resolveSidebar } from "./registry";
-export { ADMIN_SECTION } from "./admin-nav";
+export {
+  ORG_SECTION,
+  PLATFORM_SECTION,
+  adminSectionsFor,
+  type AdminAccess,
+} from "./admin-nav";
 export const DEFAULT_PRODUCT_ID = "platform";
 export const PRODUCT_COOKIE = "bsky_product";

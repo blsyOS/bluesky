@@ -187,6 +187,32 @@ Append-only record of platform-level decisions. Newest entries last.
 - **List fields share one csv⇄JSON helper** (`src/lib/lists.ts`), adopted
   by both Contacts and Service Territory.
 
+## BO-02.01B — Platform vs Organization Administration Scaffold
+
+- **Two admin scopes, one mechanism**: `adminSectionsFor(access)` maps
+  session permissions to sidebar sections — `company.manage` →
+  Organization, `platform.manage` → Platform. `resolveSidebar` now
+  appends an array of admin sections instead of one hard-coded section,
+  so a future scope is a new section + one `AdminAccess` boolean.
+- **Nav hiding is not security**: `requirePermission(key)`
+  (`src/lib/authz.ts`) guards the `/platform` and `/company` layouts
+  server-side and `notFound()`s without the permission, so direct URLs
+  are blocked too.
+- **Wording says "Organization", storage says `Company`**: all tenant-
+  facing UI copy renamed; Prisma models and routes unchanged — renaming
+  models would churn every query for zero behavioral gain.
+- **BlueSky Locating is a normal tenant.** It licenses products like any
+  customer; no special code paths. No separate dispatch portal in the
+  MVP — if BlueSky dispatches for ABC Locating, those users operate
+  inside ABC Locating's tenant. A cross-company dispatch command center
+  is future scope. Platform staff differ only by holding
+  `platform.manage`.
+- **Scaffold discipline**: only `/platform/companies` reads real data
+  (the one legitimate cross-tenant query); the other six pages are
+  explicit placeholders listing planned functionality — no invented
+  data. The secondary-tab pattern was extracted into a shared `TabNav`
+  now used by Organization, Locate, and Platform.
+
 ## Visual refresh (post BO-01.03B)
 
 - **Light navigation shell**: the sidebar is light in light mode (white

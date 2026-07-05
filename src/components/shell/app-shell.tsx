@@ -17,10 +17,11 @@ import { NotificationLauncher } from "@/components/notifications/notification-la
 import { useProductContext } from "@/components/shell/product-context";
 import { UserMenu, type MenuUser } from "@/components/shell/user-menu";
 import {
-  ADMIN_SECTION,
+  adminSectionsFor,
   DEFAULT_PRODUCT_ID,
   productRegistry,
   resolveSidebar,
+  type AdminAccess,
 } from "@/lib/products";
 import { setPreferenceCookie } from "@/lib/cookies";
 import { accentStyle } from "@/lib/accents";
@@ -38,11 +39,14 @@ const SIDEBAR_COOKIE = "bsky_sidebar";
 export function AppShell({
   company,
   user,
+  access,
   initialCollapsed = false,
   children,
 }: {
   company: ShellCompany;
   user: MenuUser;
+  /** Which admin scopes this user may see (from server-side permissions). */
+  access: AdminAccess;
   /** Server-read cookie value, so SSR renders the persisted state without a flash. */
   initialCollapsed?: boolean;
   children: React.ReactNode;
@@ -61,11 +65,15 @@ export function AppShell({
   }
 
   // The sidebar is generated entirely from the active product's config —
-  // no hardcoded module nav. Administration is appended globally.
+  // no hardcoded module nav. Admin sections (Organization and, for BlueSky
+  // platform admins only, Platform) are appended per the user's access.
   const activeProductConfig =
     productRegistry.get(activeProductId) ??
     productRegistry.get(DEFAULT_PRODUCT_ID)!;
-  const navSections = resolveSidebar(activeProductConfig, ADMIN_SECTION);
+  const navSections = resolveSidebar(
+    activeProductConfig,
+    adminSectionsFor(access)
+  );
 
   // The shell subtly adopts the active product's accent (active nav bar,
   // highlights); the platform context stays on the neutral brand color.

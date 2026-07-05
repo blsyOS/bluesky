@@ -1,8 +1,4 @@
-"use client";
-
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { cn } from "@/lib/cn";
+import { TabNav } from "@/components/tab-nav";
 
 /**
  * Secondary navigation for the Locate module application. Sits inside the
@@ -19,32 +15,5 @@ const LOCATE_PAGES = [
 ];
 
 export function LocateNav() {
-  const pathname = usePathname();
-  return (
-    <nav
-      aria-label="Locate module"
-      className="mb-6 flex gap-1 overflow-x-auto border-b border-border"
-    >
-      {LOCATE_PAGES.map((page) => {
-        const active = page.exact
-          ? pathname === page.href
-          : pathname === page.href || pathname.startsWith(`${page.href}/`);
-        return (
-          <Link
-            key={page.href}
-            href={page.href}
-            aria-current={active ? "page" : undefined}
-            className={cn(
-              "whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-medium transition-colors",
-              active
-                ? "border-primary text-foreground"
-                : "border-transparent text-muted-foreground hover:text-foreground"
-            )}
-          >
-            {page.label}
-          </Link>
-        );
-      })}
-    </nav>
-  );
+  return <TabNav pages={LOCATE_PAGES} ariaLabel="Locate module" />;
 }

@@ -42,6 +42,10 @@ export default async function AppLayout({
           role,
           companyName: session.company.name,
         }}
+        access={{
+          organization: session.hasPermission("company.manage"),
+          platform: session.hasPermission("platform.manage"),
+        }}
         initialCollapsed={cookieStore.get("bsky_sidebar")?.value === "collapsed"}
       >
         {children}

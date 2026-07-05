@@ -33,8 +33,8 @@ export default async function SettingsPage() {
 
         <Card>
           <CardHeader
-            title="Company profile"
-            description="Moved to Company Administration."
+            title="Organization profile"
+            description="Managed under Organization Administration."
           />
           <CardBody className="flex items-center gap-3">
             <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg bg-surface-muted text-muted-foreground">
@@ -44,14 +44,14 @@ export default async function SettingsPage() {
               <p className="text-sm font-medium">{session.company.name}</p>
               <p className="text-caption">
                 Profile, branding, addresses, service territory, and feature
-                flags now live in the Company area.
+                flags live in the Organization area.
               </p>
             </div>
             <Link
               href="/company"
               className="shrink-0 text-sm font-medium text-primary hover:underline"
             >
-              Open Company →
+              Open Organization →
             </Link>
           </CardBody>
         </Card>

@@ -1,6 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { ProductRegistry, resolveSidebar } from "../src/lib/products/registry";
+import {
+  ORG_SECTION,
+  PLATFORM_SECTION,
+  adminSectionsFor,
+} from "../src/lib/products/admin-nav";
 import type { NavSection, ProductNavConfig } from "../src/lib/products/types";
 import {
   CONTACT_TYPES,
@@ -56,16 +61,16 @@ test("switching product changes the resolved landing", () => {
   assert.equal(reg.get("locate")?.defaultLanding, "/dashboard/locate");
 });
 
-// ── Config-driven sidebar + Administration ───────────────────────────────
+// ── Config-driven sidebar + admin sections ───────────────────────────────
 
-test("sidebar is product config plus a global Administration section", () => {
-  const sections = resolveSidebar(config(), ADMIN);
+test("sidebar is product config plus appended admin sections", () => {
+  const sections = resolveSidebar(config(), [ADMIN]);
   assert.equal(sections[sections.length - 1].label, "Administration");
   assert.ok(sections.some((s) => s.label === "Modules"));
 });
 
 test("Contacts appears when the feature flag is on", () => {
-  const sections = resolveSidebar(config({ featureFlags: { contacts: true } }), ADMIN);
+  const sections = resolveSidebar(config({ featureFlags: { contacts: true } }), [ADMIN]);
   const labels = sections.flatMap((s) => s.items.map((i) => i.label));
   assert.ok(labels.includes("Contacts"));
 });
@@ -76,7 +81,7 @@ test("Contacts is hidden when the feature flag is off (exclusivity)", () => {
     name: "BlueSky Storm",
     featureFlags: {}, // no contacts flag
   });
-  const sections = resolveSidebar(storm, ADMIN);
+  const sections = resolveSidebar(storm, [ADMIN]);
   const labels = sections.flatMap((s) => s.items.map((i) => i.label));
   assert.ok(!labels.includes("Contacts"), "Contacts must not appear without its flag");
   // Non-flagged entries still render.
@@ -95,8 +100,45 @@ test("feature-flag gating drops empty sections", () => {
       },
     ],
   });
-  const sections = resolveSidebar(cfg, ADMIN);
+  const sections = resolveSidebar(cfg, [ADMIN]);
   assert.ok(!sections.some((s) => s.label === "OnlyContacts"));
+});
+
+// ── Permission-scoped admin sections (BO-02.01B) ─────────────────────────
+
+test("org admins see Organization but not Platform", () => {
+  const sections = adminSectionsFor({ organization: true, platform: false });
+  assert.deepEqual(sections.map((s) => s.label), ["Organization"]);
+});
+
+test("platform admins see Organization then Platform", () => {
+  const sections = adminSectionsFor({ organization: true, platform: true });
+  assert.deepEqual(sections.map((s) => s.label), ["Organization", "Platform"]);
+});
+
+test("no admin permissions means no admin sections", () => {
+  assert.deepEqual(adminSectionsFor({ organization: false, platform: false }), []);
+});
+
+test("Platform section routes live under /platform", () => {
+  for (const item of PLATFORM_SECTION.items) {
+    assert.ok(item.href.startsWith("/platform/"), `${item.label} → ${item.href}`);
+  }
+  // Organization items never point into /platform.
+  for (const item of ORG_SECTION.items) {
+    assert.ok(!item.href.startsWith("/platform"), `${item.label} → ${item.href}`);
+  }
+});
+
+test("resolveSidebar appends multiple admin sections in order", () => {
+  const sections = resolveSidebar(
+    config(),
+    adminSectionsFor({ organization: true, platform: true })
+  );
+  assert.deepEqual(sections.slice(-2).map((s) => s.label), [
+    "Organization",
+    "Platform",
+  ]);
 });
 
 // ── Built-in product configs (integration) ───────────────────────────────

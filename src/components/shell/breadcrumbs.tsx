@@ -73,7 +73,8 @@ export function Breadcrumbs({
 /** Labels for platform routes; product routes resolve via productNames. */
 const ROUTE_LABELS: Record<string, string> = {
   dashboard: "Dashboard",
-  company: "Company",
+  company: "Organization",
+  platform: "Platform",
   products: "Products",
   users: "Users",
   roles: "Roles & Permissions",

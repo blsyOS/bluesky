@@ -41,8 +41,8 @@ export function ProductContextPanel() {
         {active ? (
           <p className="text-caption">
             Currently active: <span className="font-medium text-foreground">{active.name}</span>.
-            The sidebar shows this product&apos;s modules; Administration is
-            always available.
+            The sidebar shows this product&apos;s modules; your
+            administration sections stay available.
           </p>
         ) : null}
       </div>

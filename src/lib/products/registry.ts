@@ -33,12 +33,13 @@ export class ProductRegistry {
 export const productRegistry = new ProductRegistry();
 
 /**
- * Resolves a product's sidebar: its own sections plus the appended
- * Administration section, with feature-flag-gated entries removed.
+ * Resolves a product's sidebar: its own sections (feature-flag-gated) plus
+ * the globally-appended admin sections the user may see (Organization
+ * and/or Platform — see admin-nav.ts).
  */
 export function resolveSidebar(
   config: ProductNavConfig,
-  adminSection: NavSection
+  adminSections: NavSection[]
 ): NavSection[] {
   const gate = (items: NavEntry[]) =>
     items.filter((item) => !item.featureFlag || config.featureFlags[item.featureFlag]);
@@ -47,5 +48,5 @@ export function resolveSidebar(
     .map((section) => ({ ...section, items: gate(section.items) }))
     .filter((section) => section.items.length > 0);
 
-  return [...sections, adminSection];
+  return [...sections, ...adminSections];
 }

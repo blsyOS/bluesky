@@ -1,11 +1,7 @@
-"use client";
+import { TabNav } from "@/components/tab-nav";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { cn } from "@/lib/cn";
-
-/** Secondary navigation for Company Administration. */
-const COMPANY_PAGES = [
+/** Secondary navigation for Organization Administration. */
+const ORGANIZATION_PAGES = [
   { label: "Profile", href: "/company", exact: true },
   { label: "Branding", href: "/company/branding" },
   { label: "Addresses", href: "/company/addresses" },
@@ -15,32 +11,7 @@ const COMPANY_PAGES = [
 ];
 
 export function CompanyNav() {
-  const pathname = usePathname();
   return (
-    <nav
-      aria-label="Company administration"
-      className="mb-6 flex gap-1 overflow-x-auto border-b border-border"
-    >
-      {COMPANY_PAGES.map((page) => {
-        const active = page.exact
-          ? pathname === page.href
-          : pathname === page.href || pathname.startsWith(`${page.href}/`);
-        return (
-          <Link
-            key={page.href}
-            href={page.href}
-            aria-current={active ? "page" : undefined}
-            className={cn(
-              "whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-medium transition-colors",
-              active
-                ? "border-primary text-foreground"
-                : "border-transparent text-muted-foreground hover:text-foreground"
-            )}
-          >
-            {page.label}
-          </Link>
-        );
-      })}
-    </nav>
+    <TabNav pages={ORGANIZATION_PAGES} ariaLabel="Organization administration" />
   );
 }
