@@ -281,3 +281,26 @@ export function BuildingIcon(props: IconProps) {
     </Icon>
   );
 }
+
+export function TeamIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="12" cy="7" r="3" />
+      <path d="M6.5 21v-1a5.5 5.5 0 0111 0v1" />
+      <circle cx="4.5" cy="10" r="2.2" />
+      <circle cx="19.5" cy="10" r="2.2" />
+      <path d="M1.5 18.5V18a3.5 3.5 0 013.5-3.4M22.5 18.5V18a3.5 3.5 0 00-3.5-3.4" />
+    </Icon>
+  );
+}
+
+export function SitemapIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <rect x="9" y="3" width="6" height="5" rx="1.2" />
+      <rect x="3" y="16" width="6" height="5" rx="1.2" />
+      <rect x="15" y="16" width="6" height="5" rx="1.2" />
+      <path d="M12 8v4M6 16v-2a2 2 0 012-2h8a2 2 0 012 2v2M12 12v4" />
+    </Icon>
+  );
+}

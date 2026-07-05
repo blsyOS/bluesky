@@ -4,17 +4,7 @@ import { SettingsPanel } from "@/components/ui/settings-panel";
 import { ToastForm } from "@/components/ui/toast-form";
 import { updateCompanySettings } from "@/lib/actions/companies";
 import { THEMES } from "@/lib/constants";
-
-const TIMEZONES = [
-  "America/New_York",
-  "America/Chicago",
-  "America/Denver",
-  "America/Phoenix",
-  "America/Los_Angeles",
-  "America/Anchorage",
-  "Pacific/Honolulu",
-  "UTC",
-];
+import { TIMEZONES } from "@/lib/organization";
 
 export type PreferencesData = {
   timezone: string;

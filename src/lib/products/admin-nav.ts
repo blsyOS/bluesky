@@ -3,10 +3,13 @@ import {
   BuildingIcon,
   ChartBarIcon,
   ContactIcon,
+  MapPinIcon,
   ScrollIcon,
   SettingsIcon,
   ShieldIcon,
+  SitemapIcon,
   SparkleIcon,
+  TeamIcon,
   UsersIcon,
 } from "@/components/icons";
 import type { NavSection } from "./types";
@@ -26,6 +29,9 @@ export const ORG_SECTION: NavSection = {
   label: "Organization",
   items: [
     { label: "Organization", href: "/company", icon: BuildingIcon },
+    { label: "Locations", href: "/locations", icon: MapPinIcon },
+    { label: "Departments", href: "/departments", icon: SitemapIcon },
+    { label: "Teams", href: "/teams", icon: TeamIcon },
     { label: "Products", href: "/products", icon: BoxesIcon },
     { label: "Users", href: "/users", icon: UsersIcon },
     { label: "Roles & Permissions", href: "/roles", icon: ShieldIcon },

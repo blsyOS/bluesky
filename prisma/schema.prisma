@@ -49,8 +49,99 @@ model Company {
   addresses        CompanyAddress[]
   serviceTerritory CompanyServiceTerritory?
   featureFlags     CompanyFeatureFlag[]
+  locations        OrganizationLocation[]
+  departments      Department[]
+  teams            Team[]
 
   @@map("companies")
+}
+
+// ── Organization structure (BO-02.01C) ─────────────────────────────────
+// The shared organizational skeleton every product operates against:
+// Locations → Departments → Teams. Employees, vehicles, equipment,
+// inventory, and dispatch areas will reference these models in future
+// build orders — no such relationships exist yet by design.
+
+// A physical operating location (headquarters, service center, utility
+// yard, temporary storm office, …). Types/statuses are typed string
+// constants in src/lib/organization.ts.
+model OrganizationLocation {
+  id          String  @id @default(cuid())
+  companyId   String
+  name        String
+  code        String? // short operational code, e.g. "HQ", "YARD-01"
+  type        String  @default("branch_office")
+  status      String  @default("active") // active | inactive
+  description String?
+
+  // Address
+  addressLine1 String?
+  addressLine2 String?
+  city         String?
+  state        String?
+  postalCode   String?
+  country      String? @default("USA")
+
+  // Operations
+  timezone           String?
+  businessHoursStart String? // "08:00"
+  businessHoursEnd   String? // "17:00"
+  phone              String?
+  email              String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, name])
+  @@index([companyId, status])
+  @@map("organization_locations")
+}
+
+// An organizational function (Operations, Dispatch, Safety, …). The
+// platform offers a default set (src/lib/organization.ts) and
+// organizations add their own. Manager and default location are future
+// employee-foundation fields and intentionally not modeled yet.
+model Department {
+  id          String  @id @default(cuid())
+  companyId   String
+  name        String
+  description String?
+  active      Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  teams   Team[]
+
+  @@unique([companyId, name])
+  @@index([companyId, active])
+  @@map("departments")
+}
+
+// A working unit inside a department (Locate Team A, Dispatch Day
+// Shift, …). Team lead, members, equipment, vehicles, and schedules are
+// future build orders.
+model Team {
+  id           String  @id @default(cuid())
+  companyId    String
+  departmentId String
+  name         String
+  code         String? // short operational code, e.g. "LOC-A"
+  description  String?
+  active       Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company    Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  department Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, name])
+  @@index([companyId, departmentId])
+  @@map("teams")
 }
 
 // Company-level contact channels (1:1). Future-ready fields may exist here
@@ -318,6 +409,14 @@ model CompanySettings {
   dateFormat   String   @default("MM/DD/YYYY")
   timeFormat   String   @default("12h")
   defaultTheme String   @default("system") // light | dark | system
+
+  // Business & operations defaults (BO-02.01C). Holidays, scheduling
+  // rules, and dispatch defaults arrive with their modules.
+  workWeek           String @default("monday_friday") // see WORK_WEEKS
+  businessHoursStart String @default("08:00")
+  businessHoursEnd   String @default("17:00")
+  defaultShiftHours  Int    @default(8)
+
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

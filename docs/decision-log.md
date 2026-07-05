@@ -213,6 +213,30 @@ Append-only record of platform-level decisions. Newest entries last.
   data. The secondary-tab pattern was extracted into a shared `TabNav`
   now used by Organization, Locate, and Platform.
 
+## BO-02.01C — Organization Structure Foundation
+
+- **One shared skeleton for every product**: `OrganizationLocation`,
+  `Department`, `Team` (teams belong to departments; locations and
+  departments are independent). Employees, dispatch, storm ops,
+  scheduling, fleet, and QA/QC will reference these — nothing
+  product-specific was built.
+- **Types are constants, not schema**: location types, default
+  departments, work weeks, and shift lengths live in
+  `src/lib/organization.ts` (same pattern as address types and feature
+  flags), so additions are one-line changes.
+- **Defaults are offered, never seeded**: "Add default departments"
+  creates only the missing ones on explicit admin action (audit-logged)
+  — consistent with the no-invented-data rule.
+- **Deactivate over delete**: rows toggle active/inactive because future
+  operational records will reference them.
+- **Future FK fields stay out of the schema**: manager, default
+  location, team lead, and members arrive with the Employee model so
+  they can be real foreign keys instead of placeholder strings.
+- **Settings expansion, not a new store**: business/operations defaults
+  (work week, business hours, default shift length) are new
+  `CompanySettings` columns managed in a Business & operations panel on
+  Organization → Preferences.
+
 ## Visual refresh (post BO-01.03B)
 
 - **Light navigation shell**: the sidebar is light in light mode (white
