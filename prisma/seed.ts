@@ -101,30 +101,12 @@ const ROLE_PERMISSION_GRANTS: Record<string, readonly string[]> = {
 };
 
 async function main() {
-  console.log("Seeding BlueSky OS platform foundation...");
+  console.log("Seeding BlueSky OS platform catalog...");
 
-  // Company tenant: BlueSky Locating
-  const company = await db.company.upsert({
-    where: { slug: "bluesky-locating" },
-    update: {},
-    create: {
-      name: "BlueSky Locating",
-      legalName: "BlueSky Locating, LLC",
-      slug: "bluesky-locating",
-      subdomain: "bluesky",
-      status: "active",
-      primaryColor: "#2563eb",
-      settings: {
-        create: {
-          timezone: "America/Chicago",
-          dateFormat: "MM/DD/YYYY",
-          timeFormat: "12h",
-          defaultTheme: "system",
-        },
-      },
-    },
-  });
-  console.log(`Company: ${company.name} (${company.subdomain})`);
+  // BO-AUTH-01: the seed provisions only the platform catalog — products,
+  // permissions, and system roles. No tenant and no administrator are
+  // seeded; the Initial Setup Wizard (/setup) creates the platform
+  // administrator, the first organization, and its administrator.
 
   // Products
   const products = [];
@@ -137,21 +119,6 @@ async function main() {
     products.push(product);
   }
   console.log(`Products: ${products.map((p) => p.name).join(", ")}`);
-
-  // Enable all products for BlueSky Locating
-  for (const product of products) {
-    await db.companyProduct.upsert({
-      where: { companyId_productId: { companyId: company.id, productId: product.id } },
-      update: { status: "active", disabledAt: null },
-      create: {
-        companyId: company.id,
-        productId: product.id,
-        status: "active",
-        enabledAt: new Date(),
-      },
-    });
-  }
-  console.log("All products enabled for BlueSky Locating.");
 
   // Permissions
   const permissionsByKey = new Map<string, { id: string }>();
@@ -199,50 +166,11 @@ async function main() {
   }
   console.log("Role permissions assigned.");
 
-  // Admin user with Platform Admin role on every product
-  const admin = await db.user.upsert({
-    where: { email: "admin@blueskyos.app" },
-    update: { firstName: "BlueSky", lastName: "Admin" },
-    create: {
-      companyId: company.id,
-      firstName: "BlueSky",
-      lastName: "Admin",
-      email: "admin@blueskyos.app",
-      status: "active",
-    },
-  });
-  const platformAdminRole = rolesByKey.get("platform_admin")!;
-  for (const product of products) {
-    await db.userProductRole.upsert({
-      where: {
-        userId_productId_roleId: {
-          userId: admin.id,
-          productId: product.id,
-          roleId: platformAdminRole.id,
-        },
-      },
-      update: {},
-      create: { userId: admin.id, productId: product.id, roleId: platformAdminRole.id },
-    });
-  }
-  console.log(`Admin user: ${admin.email} (Platform Admin on all products)`);
-
-  // Initial audit entry so the trail starts at provisioning
-  const existingSeedLog = await db.auditLog.findFirst({
-    where: { companyId: company.id, action: "company.provisioned" },
-  });
-  if (!existingSeedLog) {
-    await db.auditLog.create({
-      data: {
-        companyId: company.id,
-        userId: admin.id,
-        action: "company.provisioned",
-        entityType: "Company",
-        entityId: company.id,
-        description: "BlueSky Locating tenant provisioned with all products enabled.",
-        metadata: JSON.stringify({ products: PRODUCTS.map((p) => p.key) }),
-      },
-    });
+  const userCount = await db.user.count();
+  if (userCount === 0) {
+    console.log(
+      "No users exist yet — open the app to run the Initial Setup Wizard (/setup)."
+    );
   }
 
   console.log("Seed complete.");

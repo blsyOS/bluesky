@@ -237,6 +237,31 @@ Append-only record of platform-level decisions. Newest entries last.
   `CompanySettings` columns managed in a Business & operations panel on
   Organization → Preferences.
 
+## BO-AUTH-01 — Authentication & Identity Foundation
+
+- **Argon2id for password hashing** (argon2 package, library defaults):
+  self-describing hashes allow future parameter upgrades without
+  invalidating credentials.
+- **Database sessions keyed by token hash**: the browser holds a random
+  256-bit token; the DB stores only its SHA-256, so a leaked database
+  cannot be replayed. 12-hour standard sessions, 30-day remember-me.
+- **Two-layer route protection**: `src/proxy.ts` (Next 16 middleware)
+  fast-fails cookie-less requests without touching the DB; real
+  validation (expiry, revocation, user status) happens server-side in
+  `getCurrentSession()`, which now redirects to /login — every existing
+  call site keeps its non-null contract, so no page needed changes.
+- **The seeded admin is gone**: the seed provisions the catalog only;
+  the Initial Setup Wizard (/setup, available only while zero users
+  exist) creates the platform administrator, first organization, and
+  organization administrator, then permanently disables itself.
+- **No account enumeration**: generic login errors; account status is
+  revealed only after a correct password; reset requests always return
+  the same message (and are audited when the account exists).
+- **Password change revokes all other sessions**; policy (8+ chars,
+  upper/lower/number/special) is a passed-in object so per-org
+  overrides, expiration, and history are future drop-ins. MFA/SSO
+  explicitly deferred.
+
 ## Visual refresh (post BO-01.03B)
 
 - **Light navigation shell**: the sidebar is light in light mode (white

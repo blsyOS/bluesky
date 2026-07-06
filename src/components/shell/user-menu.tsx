@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useTheme } from "next-themes";
 import { usePopover } from "@/components/shell/use-popover";
 import { useToast } from "@/components/ui/toast";
 import { ChevronDownIcon } from "@/components/icons";
+import { logout } from "@/lib/actions/auth";
 import { cn } from "@/lib/cn";
 
 export type MenuUser = {
@@ -114,14 +114,15 @@ export function UserMenu({ user }: { user: MenuUser }) {
           </div>
 
           <div className="border-t border-border pt-1.5">
-            <Link
-              href="/login"
-              role="menuitem"
-              onClick={() => setOpen(false)}
-              className="block rounded-lg px-3 py-2.5 text-sm font-medium text-danger transition-colors hover:bg-danger/10"
-            >
-              Log out
-            </Link>
+            <form action={logout}>
+              <button
+                type="submit"
+                role="menuitem"
+                className="block w-full cursor-pointer rounded-lg px-3 py-2.5 text-left text-sm font-medium text-danger transition-colors hover:bg-danger/10"
+              >
+                Log out
+              </button>
+            </form>
           </div>
         </div>
       ) : null}

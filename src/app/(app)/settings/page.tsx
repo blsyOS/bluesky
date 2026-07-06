@@ -3,6 +3,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { PreferencesPanel } from "@/components/company/preferences-panel";
+import { SecurityPanel } from "@/components/security-panel";
 import { BuildingIcon } from "@/components/icons";
 import { getCurrentSession } from "@/lib/session";
 import { ProductContextPanel } from "./product-context-panel";
@@ -30,6 +31,11 @@ export default async function SettingsPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <PreferencesPanel settings={session.company.settings} />
+
+        <SecurityPanel
+          lastLoginAt={session.user.lastLoginAt?.toISOString() ?? null}
+          lastActivityAt={session.sessionLastActivityAt.toISOString()}
+        />
 
         <Card>
           <CardHeader

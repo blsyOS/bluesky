@@ -45,13 +45,15 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000). The seed provisions the
-**BlueSky Locating** tenant (subdomain `bluesky`) with all five products
-enabled, the system roles (Platform Admin, Company Admin, Manager,
-Supervisor, Tech, Viewer), the initial permission set, and a platform admin
-user (`admin@blueskyos.app`).
+platform catalog only: the five products, the system roles (Platform Admin,
+Company Admin, Manager, Supervisor, Tech, Viewer), and the initial
+permission set. No tenant and no administrator are seeded.
 
-Authentication is a placeholder for now — the session is pinned to the
-seeded platform admin in `src/lib/session.ts`.
+On first launch you are redirected to the **Initial Setup Wizard**
+(`/setup`), which creates the platform administrator, the first
+organization, and its administrator. After setup, sign in at `/login`.
+Authentication (BO-AUTH-01) uses Argon2id password hashing and
+database-backed sessions; see `docs/build-orders/BO-AUTH-01.md`.
 
 ## Project layout
 

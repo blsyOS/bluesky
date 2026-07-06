@@ -308,16 +308,45 @@ model User {
   email     String   @unique
   phone     String?
   avatarUrl String?
-  status    String   @default("invited") // active | inactive | invited | suspended
+  status    String   @default("invited") // active | inactive (disabled) | invited (pending invitation) | suspended
+
+  // Authentication (BO-AUTH-01). Null passwordHash = the user cannot
+  // authenticate yet (e.g. pending invitation before email integration).
+  passwordHash String?
+  lastLoginAt  DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   company      Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
   productRoles UserProductRole[]
   auditLogs    AuditLog[]
+  sessions     Session[]
 
   @@index([companyId])
   @@map("users")
+}
+
+// Server-side session store (BO-AUTH-01). The browser holds a random
+// token; only its SHA-256 hash is stored here. Expiry is absolute:
+// short-lived for normal sign-ins, extended for "remember me".
+// revokedAt supports logout and future concurrent-session management.
+model Session {
+  id             String    @id @default(cuid())
+  userId         String
+  tokenHash      String    @unique
+  rememberMe     Boolean   @default(false)
+  expiresAt      DateTime
+  lastActivityAt DateTime  @default(now())
+  revokedAt      DateTime?
+  ipAddress      String?
+  userAgent      String?
+  createdAt      DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
 }
 
 model Role {

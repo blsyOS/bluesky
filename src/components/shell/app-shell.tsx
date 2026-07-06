@@ -25,6 +25,7 @@ import {
 } from "@/lib/products";
 import { setPreferenceCookie } from "@/lib/cookies";
 import { accentStyle } from "@/lib/accents";
+import { logout } from "@/lib/actions/auth";
 import { cn } from "@/lib/cn";
 
 export type ShellCompany = {
@@ -275,13 +276,15 @@ export function AppShell({
                     {user.role}
                   </p>
                 </div>
-                <Link
-                  href="/login"
-                  className="text-xs text-sidebar-muted hover:text-foreground"
-                  title="Sign out"
-                >
-                  Sign out
-                </Link>
+                <form action={logout}>
+                  <button
+                    type="submit"
+                    className="cursor-pointer text-xs text-sidebar-muted hover:text-foreground"
+                    title="Sign out"
+                  >
+                    Sign out
+                  </button>
+                </form>
               </>
             ) : null}
           </div>
